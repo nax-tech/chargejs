@@ -1,6 +1,6 @@
 {
   "name": "@charge-tech/chargejs",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "The Charge Core JS implementation.",
   "main": "src/index.js",
   "engines": {
