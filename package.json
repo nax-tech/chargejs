@@ -1,0 +1,25 @@
+{
+  "name": "@charge-tech/chargejs",
+  "version": "1.0.0",
+  "description": "The Charge Core JS implementation.",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=4.0.0"
+  },
+  "scripts": {
+    "test": "mocha",
+    "lint": "standard",
+    "lint:fix": "standard --fix",
+    "lint-fix": "lint:fix"
+  },
+  "author": "nicolas@charge.io",
+  "license": "MIT",
+  "standard": {
+    "env": [ "mocha" ]
+  },
+  "devDependencies": {
+    "mocha": "^7.1.2",
+    "np": "^6.2.2",
+    "standard": "^14.3.3"
+  }
+}
