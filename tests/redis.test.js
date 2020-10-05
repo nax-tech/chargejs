@@ -1,8 +1,8 @@
-const assert = require('assert')
-const utils = require('../src/utils')
+import assert from 'assert'
+import { redis } from '../src'
 
-describe('Utils', function () {
-  describe('getRedisPrefix', function () {
+describe('redis', function () {
+  describe('redis.getPrefix', function () {
     const incorrectEnvironment = 'devs'
     const developmentEnv = 'development'
     const devEnv = 'dev'
@@ -14,7 +14,7 @@ describe('Utils', function () {
     it('it should throw an error if app is incorrect', function () {
       assert.throws(
         function () {
-          utils.getPrefix(incorrectEnvironment, payments)
+          redis.getPrefix(incorrectEnvironment, payments)
         },
         Error,
         `Invalid environment for Redis prefix: ${incorrectEnvironment}`
@@ -23,7 +23,7 @@ describe('Utils', function () {
     it('it should throw an error if env is incorrect', function () {
       assert.throws(
         function () {
-          utils.getPrefix(developmentEnv, wallet)
+          redis.getPrefix(developmentEnv, wallet)
         },
         Error,
         `Invalid package for Redis prefix: ${wallet}`
@@ -31,37 +31,37 @@ describe('Utils', function () {
     })
     it('it returns correct value for development:identity', function () {
       assert.strictEqual(
-        utils.getPrefix(developmentEnv, identity),
+        redis.getPrefix(developmentEnv, identity),
         'development:identity:'
       )
     })
     it('it returns correct value for dev:identity', function () {
-      assert.strictEqual(utils.getPrefix(devEnv, identity), 'dev:identity:')
+      assert.strictEqual(redis.getPrefix(devEnv, identity), 'dev:identity:')
     })
     it('it returns correct value for stage:identity', function () {
-      assert.strictEqual(utils.getPrefix(stageEnv, identity), 'stage:identity:')
+      assert.strictEqual(redis.getPrefix(stageEnv, identity), 'stage:identity:')
     })
     it('it returns correct value for production:identity', function () {
       assert.strictEqual(
-        utils.getPrefix(prodEnv, identity),
+        redis.getPrefix(prodEnv, identity),
         'production:identity:'
       )
     })
     it('it returns correct value for development:payments', function () {
       assert.strictEqual(
-        utils.getPrefix(developmentEnv, payments),
+        redis.getPrefix(developmentEnv, payments),
         'development:payments:'
       )
     })
     it('it returns correct value for dev:payments', function () {
-      assert.strictEqual(utils.getPrefix(devEnv, payments), 'dev:payments:')
+      assert.strictEqual(redis.getPrefix(devEnv, payments), 'dev:payments:')
     })
     it('it returns correct value for stage:payments', function () {
-      assert.strictEqual(utils.getPrefix(stageEnv, payments), 'stage:payments:')
+      assert.strictEqual(redis.getPrefix(stageEnv, payments), 'stage:payments:')
     })
     it('it returns correct value for production:payments', function () {
       assert.strictEqual(
-        utils.getPrefix(prodEnv, payments),
+        redis.getPrefix(prodEnv, payments),
         'production:payments:'
       )
     })

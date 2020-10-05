@@ -7,7 +7,13 @@
     "node": ">=4.0.0"
   },
   "scripts": {
-    "test": "mocha",
+    "postinstall": "husky install",
+    "test": "NODE_PATH=. NODE_ENV=test mocha --require esm './tests/**/*.test.js'",
+    "test:watch": "NODE_PATH=. NODE_ENV=test mocha --require esm './tests/**/*.test.js' --watch --recursive",
+    "test:report": "NODE_PATH=. NODE_ENV=test nyc --reporter=lcov --reporter=text mocha --require esm './tests/**/*.test.js'",
+    "test:watch:report": "NODE_PATH=. NODE_ENV=test nodemon --exec nyc --reporter=lcov --reporter=text mocha --require esm './tests/**/*.test.js'",
+    "docs": "./node_modules/.bin/jsdoc -r src -d ./docs --readme ./README.md",
+    "document": "jsdoc2md ./src/*.js > DOCS.md",
     "lint": "standard",
     "lint:fix": "standard --fix",
     "lint-fix": "lint:fix"
@@ -15,10 +21,20 @@
   "author": "nicolas@charge.io",
   "license": "MIT",
   "standard": {
-    "env": [ "mocha" ]
+    "env": [
+      "mocha"
+    ]
   },
   "devDependencies": {
+    "husky": "^5.0.0-alpha.6",
+    "jsdoc": "^3.6.6",
+    "jsdoc-to-markdown": "^6.0.1",
     "mocha": "^7.1.2",
+    "nodemon": "^2.0.4",
+    "nyc": "^15.1.0",
     "standard": "^14.3.3"
+  },
+  "dependencies": {
+    "esm": "^3.2.25"
   }
 }
