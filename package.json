@@ -12,7 +12,7 @@
     "test:watch": "NODE_PATH=. NODE_ENV=test mocha --require esm './tests/**/*.test.js' --watch --recursive",
     "test:report": "NODE_PATH=. NODE_ENV=test nyc --reporter=lcov --reporter=text mocha --require esm './tests/**/*.test.js'",
     "test:watch:report": "NODE_PATH=. NODE_ENV=test nodemon --exec nyc --reporter=lcov --reporter=text mocha --require esm './tests/**/*.test.js'",
-    "docs": "./node_modules/.bin/jsdoc -r src -d ./docs --readme ./README.md",
+    "docs": "jsdoc -r src -d ./docs --readme ./README.md",
     "document": "jsdoc2md ./src/*.js > DOCS.md",
     "lint": "standard",
     "lint:fix": "standard --fix",
@@ -36,5 +36,17 @@
   },
   "dependencies": {
     "esm": "^3.2.25"
-  }
+  },
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/charge-tech/chargejs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/charge-tech/chargejs/issues"
+  },
+  "homepage": "https://github.com/charge-tech/chargejs#readme"
 }
