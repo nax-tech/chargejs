@@ -1,0 +1,5 @@
+linters:
+  ./**/*.js:
+    - standard --fix
+    - npm run document
+    - git add -A
