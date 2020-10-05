@@ -1,7 +1,7 @@
 <a name="module_redis"></a>
 
 ## redis
-A redis type module
+A module for handling redis functionality
 
 <a name="module_redis.exports.getPrefix"></a>
 
