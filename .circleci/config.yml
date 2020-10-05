@@ -1,7 +1,7 @@
 version: 2.1 
 jobs: 
   build: 
-    working_directory: ~/charge-identity-widget
+    working_directory: ~/chargejs
     docker:
       - image: circleci/node:10.16.3
     steps:
@@ -9,6 +9,13 @@ jobs:
       - run:
           name: update-npm
           command: 'sudo npm install -g npm@latest'
+      - run:
+          name: Setup Code Climate test-reporter
+          command: |
+            # download test reporter as a static binary
+              curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+              chmod +x ./cc-test-reporter
+              ./cc-test-reporter before-build
       - restore_cache: 
           key: dependency-cache-{{ checksum "package-lock.json" }}
       - run:
@@ -23,4 +30,11 @@ jobs:
           command: npm run lint
       - run:
           name: Test
-          command: npm run test
+          command: npm run test:report
+      - run:
+          name: Send coverage report to Code Climate
+          command:
+              # nyc report requires that nyc has already been run,
+              # which creates the .nyc_output folder containing necessary data
+              ./cc-test-reporter after-build -t lcov
+          when: always
