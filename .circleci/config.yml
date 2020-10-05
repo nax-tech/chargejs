@@ -1,9 +1,13 @@
 version: 2.1 
+
+defaults: &defaults
+  working_directory: ~/chargejs
+  docker:
+    - image: circleci/node:10.16.3
+
 jobs: 
   build: 
-    working_directory: ~/chargejs
-    docker:
-      - image: circleci/node:10.16.3
+    <<: *defaults  
     steps:
       - checkout
       - run:
@@ -42,17 +46,17 @@ jobs:
               ./cc-test-reporter after-build -t lcov
           when: always
       - persist_to_workspace:
-          root: ~/repo
-          paths: 
-            - ./
-    deploy:
-      steps:
-        - attach_workspace:
-            at: ~/repo
-        - run:
-            name: Authenticate with registry
-            command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/rep
-        - run:
+          root: ~/chargejs
+          paths: .
+  deploy:
+    <<: *defaults  
+    steps:
+      - attach_workspace:
+          at: ~/chargejs
+      - run:
+          name: Authenticate with registry
+          command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/rep
+      - run:
           name: Publish package
           command: npm publish
 
@@ -64,6 +68,7 @@ workflows:
       - deploy:
           requires:
             - build
-          branches:
-            only:
-              - master
+          filters:
+            branches:
+              only:
+                - master
