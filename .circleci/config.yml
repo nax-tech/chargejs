@@ -54,11 +54,8 @@ jobs:
       - attach_workspace:
           at: ~/chargejs
       - run:
-          name: Authenticate with registry
-          command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/rep
-      - run:
           name: Publish package
-          command: npm publish --access public
+          command: npx semantic-release
 
 workflows:
   version: 2
