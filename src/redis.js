@@ -1,5 +1,5 @@
 /**
- * A module for handling redis functionality
+ * A module for the redis functionality
  * @module redis
  */
 const allowedEnvironments = ['development', 'dev', 'stage', 'production']
