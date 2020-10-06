@@ -17,7 +17,8 @@
     "lint": "standard",
     "lint:fix": "standard --fix",
     "lint-fix": "lint:fix",
-    "semantic-release": "semantic-release"
+    "semantic-release": "semantic-release",
+    "commitlint": "commitlint -E HUSKY_GIT_PARAMS"
   },
   "author": "nicolas@charge.io",
   "license": "MIT",
