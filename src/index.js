@@ -1,3 +1,5 @@
 Object.defineProperty(exports, '__esModule', { value: true })
-const redis = require('./redis')
-exports.redis = redis
+const config = require('./config')
+const app = require('./app')
+exports.config = config
+exports.app = app
