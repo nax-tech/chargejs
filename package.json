@@ -7,7 +7,6 @@
     "node": ">=4.0.0"
   },
   "scripts": {
-    "postinstall": "husky install",
     "test": "NODE_PATH=. NODE_ENV=test mocha --require esm './tests/**/*.test.js'",
     "test:watch": "NODE_PATH=. NODE_ENV=test mocha --require esm './tests/**/*.test.js' --watch --recursive",
     "test:report": "NODE_PATH=. NODE_ENV=test nyc --reporter=lcov --reporter=text mocha --require esm './tests/**/*.test.js'",
