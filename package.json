@@ -18,7 +18,7 @@
     "lint:fix": "standard --fix",
     "lint-fix": "lint:fix",
     "semantic-release": "semantic-release",
-    "commitlint": "commitlint -E HUSKY_GIT_PARAMS"
+    "commitlint": "commitlint -e $HUSKY_GIT_PARAMS"
   },
   "author": "nicolas@charge.io",
   "license": "MIT",
@@ -26,12 +26,6 @@
     "env": [
       "mocha"
     ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run lint:fix && npm run test",
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }
   },
   "devDependencies": {
     "@commitlint/cli": "^11.0.0",
