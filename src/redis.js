@@ -9,7 +9,8 @@ const allowedPackages = [
   'identity',
   'notifications',
   'profiles',
-  'users'
+  'users',
+  'proxy-gateway'
 ]
 /**
  * Gets the allowed prefix for redis
