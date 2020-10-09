@@ -27,7 +27,7 @@ describe('standard error', function () {
   it('it should return valid error if errors param is not provided', function () {
     const error = standardError({
       type: 'TestError',
-      message: 'test message',
+      message: 'test message'
     })
     assert.strictEqual(error.message, 'TestError')
     assert.strictEqual(error.details, 'test message')
