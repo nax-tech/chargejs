@@ -1,5 +1,9 @@
-Object.defineProperty(exports, '__esModule', { value: true })
-const config = require('./config')
-const app = require('./app')
-exports.config = config
-exports.app = app
+Object.defineProperty(exports, '__esModule', {
+  value: true
+})
+
+module.exports = {
+  config: require('./config'),
+  app: require('./app'),
+  intefaces: require('./interfaces')
+}
