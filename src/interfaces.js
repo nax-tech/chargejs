@@ -4,13 +4,21 @@
  */
 
 /**
+ * @typedef ErrorInfo
+ * @type {Object}
+ * @property {string} param The error param name
+ * @property {string} msg The error message
+ * @property {string} location The error location
+ */
+
+/**
  * Standard error function
  *
  * @memberof module:interface
  * @param {Object} input The input object
- * @param {Object} input.type The error type
- * @param {Object} input.message The error message
- * @param {Object} input.errors The errors array
+ * @param {string} input.type The error type
+ * @param {string} input.message The error message
+ * @param {ErrorInfo[]} input.errors The errors array
  * @returns {Error}
  */
 
