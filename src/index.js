@@ -5,5 +5,7 @@ Object.defineProperty(exports, '__esModule', {
 module.exports = {
   config: require('./config'),
   app: require('./app'),
-  intefaces: require('./interfaces')
+  domain: require('./domain'),
+  infra: require('./infra'),
+  interfaces: require('./interfaces')
 }
