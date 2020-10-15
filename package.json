@@ -37,7 +37,8 @@
     "nyc": "^15.1.0",
     "semantic-release": "^17.1.2",
     "sinon": "^9.1.0",
-    "standard": "^14.3.3"
+    "standard": "^14.3.3",
+    "structure": "^2.0.1"
   },
   "dependencies": {
     "esm": "^3.2.25",
