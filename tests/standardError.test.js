@@ -1,7 +1,7 @@
 import assert from 'assert'
-import { intefaces } from '../src'
+import { interfaces } from '../src'
 
-const { standardError } = intefaces
+const { standardError } = interfaces
 
 describe('standard error', function () {
   it('it should return valid error', function () {
