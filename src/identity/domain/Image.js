@@ -102,4 +102,4 @@ const Image = attributes(
   }
 )
 
-module.exports = Image
+export default Image

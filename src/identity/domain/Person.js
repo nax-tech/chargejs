@@ -311,4 +311,4 @@ const Person = attributes(
   }
 )
 
-module.exports = Person
+export default Person

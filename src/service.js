@@ -1,5 +1,5 @@
 import identity from './identity'
 
-module.exports = {
+export {
   identity
 }
