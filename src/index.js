@@ -7,5 +7,6 @@ module.exports = {
   app: require('./app'),
   domain: require('./domain'),
   infra: require('./infra'),
-  interfaces: require('./interfaces')
+  interfaces: require('./interfaces'),
+  service: require('./service')
 }
