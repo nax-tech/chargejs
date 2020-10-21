@@ -1,7 +1,7 @@
 import domain from './domain'
 import modelsPath from './models'
 
-export {
+export default {
   modelsPath,
   domain
 }
