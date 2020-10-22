@@ -142,7 +142,6 @@ const Person = attributes(
   }
 )(
   class Person extends BaseDomain {
-
     /**
      * sets the externalId field
      * @memberof module:domain.Person

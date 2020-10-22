@@ -10,25 +10,27 @@ describe('domain', function () {
     it('it add type correctly', function () {
       const type = 'test'
       image.addType(type)
-      assert.equal(image.type, type)
+      assert.strictEqual(image.type, type)
     })
 
     it('it add personId correctly', function () {
       const personId = 'test'
       image.addPersonId(personId)
-      assert.equal(image.personId, personId)
+      assert.strictEqual(image.personId, personId)
     })
 
     it('it add metadata correctly', function () {
-      const metadata = 'test'
+      const metadata = {
+        test: 'test'
+      }
       image.addMetadata(metadata)
-      assert.equal(image.metadata, metadata)
+      assert.strictEqual(image.metadata, metadata)
     })
 
     it('it add path correctly', function () {
       const path = 'test'
       image.addPath(path)
-      assert.equal(image.path, path)
+      assert.strictEqual(image.path, path)
     })
   })
 })

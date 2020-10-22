@@ -10,103 +10,103 @@ describe('domain', function () {
     it('it add userId correctly', function () {
       const userId = 'test'
       person.addUserId(userId)
-      assert.equal(person.userId, userId)
+      assert.strictEqual(person.userId, userId)
     })
 
     it('it add externalId correctly', function () {
       const externalId = 'test'
       person.addExternalId(externalId)
-      assert.equal(person.externalId, externalId)
+      assert.strictEqual(person.externalId, externalId)
     })
 
     it('it add profile correctly', function () {
       const profile = 'test'
       person.addProfile(profile)
-      assert.equal(person.profile, profile)
+      assert.strictEqual(person.profile, profile)
     })
 
     it('it add status correctly', function () {
       const status = 'test'
       person.addStatus(status)
-      assert.equal(person.status, status)
+      assert.strictEqual(person.status, status)
     })
 
     it('it add step correctly', function () {
       const step = 'test'
       person.addStep(step)
-      assert.equal(person.step, step)
+      assert.strictEqual(person.step, step)
     })
 
     it('it add identifier correctly', function () {
       const identifier = 'test'
       person.addIdentifier(identifier)
-      assert.equal(person.identifier, identifier)
+      assert.strictEqual(person.identifier, identifier)
     })
 
     it('it add firstName correctly', function () {
       const firstName = 'test'
       person.addFirstName(firstName)
-      assert.equal(person.firstName, firstName)
+      assert.strictEqual(person.firstName, firstName)
     })
 
     it('it add lastName correctly', function () {
       const lastName = 'test'
       person.addLastName(lastName)
-      assert.equal(person.lastName, lastName)
+      assert.strictEqual(person.lastName, lastName)
     })
 
     it('it add email correctly', function () {
       const email = 'test'
       person.addEmail(email)
-      assert.equal(person.email, email)
+      assert.strictEqual(person.email, email)
     })
 
     it('it add phoneNumber correctly', function () {
       const phoneNumber = 'test'
       person.addPhoneNumber(phoneNumber)
-      assert.equal(person.phoneNumber, phoneNumber)
+      assert.strictEqual(person.phoneNumber, phoneNumber)
     })
 
     it('it add addressA correctly', function () {
       const addressA = 'test'
       person.addAddressA(addressA)
-      assert.equal(person.addressA, addressA)
+      assert.strictEqual(person.addressA, addressA)
     })
 
     it('it add addressB correctly', function () {
       const addressB = 'test'
       person.addAddressB(addressB)
-      assert.equal(person.addressB, addressB)
+      assert.strictEqual(person.addressB, addressB)
     })
 
     it('it add city correctly', function () {
       const city = 'test'
       person.addCity(city)
-      assert.equal(person.city, city)
+      assert.strictEqual(person.city, city)
     })
 
     it('it add zip correctly', function () {
       const zip = 'test'
       person.addZip(zip)
-      assert.equal(person.zip, zip)
+      assert.strictEqual(person.zip, zip)
     })
 
     it('it add country correctly', function () {
       const country = 'test'
       person.addCountry(country)
-      assert.equal(person.country, country)
+      assert.strictEqual(person.country, country)
     })
 
     it('it add dob correctly', function () {
       const dob = 'test'
       person.addDob(dob)
-      assert.equal(person.dob, dob)
+      assert.strictEqual(person.dob, dob)
     })
 
     it('it add taxId correctly', function () {
       const taxId = 'test'
       person.addTaxId(taxId)
-      assert.equal(person.taxId, taxId)
+      assert.strictEqual(person.taxId, taxId)
     })
   })
 })
