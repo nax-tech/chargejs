@@ -1,3 +1,5 @@
+import BaseDomain from '../../domain'
+
 const { attributes } = require('structure')
 /**
  * A domain type module
@@ -12,13 +14,24 @@ const { attributes } = require('structure')
  * @param {string} input.id The uuid of the person
  * @param {string} input.object The object type: person
  * @param {string} input.userId The uuid of the user owner of the person
- * @param {string} input.defaultAddressId The uuid of the default address
- * @param {string} input.accountNumber The random account number
- * @param {object} input.phoneNumber The phone number as defined in https://github.com/grantila/awesome-phonenumber via pn.toJSON()
- * @param {module:domain.Address[]} input.addresses Array of addresses
- * @param {module:domain.Setting} input.settings The settings for the person
- * @param {string} input.avatar The avatar of the person (image)
- * @param {number} input.pinCode [INT] The pin code to unlock the app
+ * @param {string} input.externalId
+ * @param {string} input.profile
+ * @param {string} input.status
+ * @param {string} input.step
+ * @param {string} input.identifier
+ * @param {string} input.firstName
+ * @param {string} input.lastName
+ * @param {string} input.email
+ * @param {string} input.phoneNumber
+ * @param {string} input.addressA
+ * @param {string} input.addressB
+ * @param {string} input.city
+ * @param {string} input.zip
+ * @param {string} input.country
+ * @param {string} input.dob
+ * @param {string} input.taxId
+ * @param {string} input.meta
+ * @param {string} input.images
  * @param {date} input.updatedAt The updated date
  * @param {date} input.createdAt The created date
  */
@@ -128,16 +141,7 @@ const Person = attributes(
     }
   }
 )(
-  class Person {
-    /**
-     * sets the userId field
-     * @memberof module:domain.Person
-     * @param {string} userId
-     * @returns {void}
-     */
-    addUserId (userId) {
-      return this.set('userId', userId)
-    }
+  class Person extends BaseDomain {
 
     /**
      * sets the externalId field
@@ -297,16 +301,6 @@ const Person = attributes(
      */
     addTaxId (taxId) {
       return this.set('taxId', taxId)
-    }
-
-    /**
-     * sets the taxId field
-     * @memberof module:domain.Person
-     * @param {string} taxId
-     * @returns {void}
-     */
-    addMeta (meta) {
-      return this.set('meta', meta)
     }
   }
 )

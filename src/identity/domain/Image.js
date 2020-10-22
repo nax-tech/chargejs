@@ -1,3 +1,5 @@
+import BaseDomain from '../../domain'
+
 const { attributes } = require('structure')
 /**
  * A domain type module
@@ -12,13 +14,10 @@ const { attributes } = require('structure')
  * @param {string} input.id The uuid of the image
  * @param {string} input.object The object type: image
  * @param {string} input.userId The uuid of the user owner of the image
- * @param {string} input.defaultAddressId The uuid of the default address
- * @param {string} input.accountNumber The random account number
- * @param {object} input.phoneNumber The phone number as defined in https://github.com/grantila/awesome-phonenumber via pn.toJSON()
- * @param {module:domain.Address[]} input.addresses Array of addresses
- * @param {module:domain.Setting} input.settings The settings for the image
- * @param {string} input.avatar The avatar of the image (image)
- * @param {number} input.pinCode [INT] The pin code to unlock the app
+ * @param {string} input.type
+ * @param {string} input.personId
+ * @param {string} input.metadata
+ * @param {string} input.path
  * @param {date} input.updatedAt The updated date
  * @param {date} input.createdAt The created date
  */
@@ -59,7 +58,7 @@ const Image = attributes(
     }
   }
 )(
-  class Image {
+  class Image extends BaseDomain {
     /**
      * sets the type field
      * @memberof module:domain.Image
