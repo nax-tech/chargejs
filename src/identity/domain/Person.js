@@ -124,7 +124,7 @@ const Person = attributes(
   },
   {
     dynamics: {
-      Image: () => require('../image/Image')
+      Image: () => require('./Image')
     }
   }
 )(
