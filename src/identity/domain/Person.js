@@ -1,6 +1,23 @@
 import BaseDomain from '../../domain'
 
 const { attributes } = require('structure')
+
+const allowedUpdatableFields = [
+  'step',
+  'identifier',
+  'firstName',
+  'lastName',
+  'email',
+  'phoneNumber',
+  'addressA',
+  'addressB',
+  'city',
+  'zip',
+  'country',
+  'dob',
+  'taxId',
+  'meta'
+]
 /**
  * A domain type module
  * @module domain
@@ -300,6 +317,15 @@ const Person = attributes(
      */
     addTaxId (taxId) {
       return this.set('taxId', taxId)
+    }
+
+    /**
+     * gets the allowed updated fields
+     * @memberof module:domain.Person
+     * @returns {string[]}
+     */
+    getUpdatableFields () {
+      return allowedUpdatableFields
     }
   }
 )
