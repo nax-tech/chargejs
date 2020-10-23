@@ -104,7 +104,7 @@ export const devErrorHandler = (err, req, res, next) => {
 
 /**
  * Sets device infor available in req object for access in controllers
- * @memberof module:device
+ * @memberof interfaces
  * @method
  * @param {http.ClientRequest} a native js http client request object
  * @param {http.ServerResponse} a native js http server response object
@@ -124,6 +124,8 @@ export const deviceMiddleware = (req, res, next) => {
       xForwardedProto: req.headers['X-Forwarded-Proto'],
       xForwardedPort: req.headers['X-Forwarded-Port']
     }
+
+    next()
   })
 }
 
