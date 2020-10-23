@@ -1,3 +1,4 @@
+import deviceIPLocation from 'device-ip-location'
 import path from 'path'
 import express from 'express'
 import http from 'http'
@@ -98,6 +99,33 @@ export const devErrorHandler = (err, req, res, next) => {
       errors: err.errors,
       stack: err.stack
     }
+  })
+}
+
+/**
+ * Sets device infor available in req object for access in controllers
+ * @memberof interfaces
+ * @method
+ * @param {http.ClientRequest} a native js http client request object
+ * @param {http.ServerResponse} a native js http server response object
+ * @param {function}
+ * @returns {function}
+ *
+ */
+export const deviceMiddleware = (req, res, next) => {
+  deviceIPLocation.getInfo(req.headers['user-agent'], req.ip, (err, res) => {
+    if (err) {
+      req.origin = { error: err }
+    } else {
+      req.origin = res
+      req.origin.client = {
+        xForwardedFor: req.headers['X-Forwarded-For'],
+        xForwardedProto: req.headers['X-Forwarded-Proto'],
+        xForwardedPort: req.headers['X-Forwarded-Port']
+      }
+    }
+
+    next()
   })
 }
 
