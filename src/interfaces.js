@@ -116,15 +116,13 @@ export const deviceMiddleware = (req, res, next) => {
   deviceIPLocation.getInfo(req.headers['user-agent'], req.ip, (err, res) => {
     if (err) {
       req.origin = { error: err }
-
-      next()
-    }
-
-    req.origin = res
-    req.origin.client = {
-      xForwardedFor: req.headers['X-Forwarded-For'],
-      xForwardedProto: req.headers['X-Forwarded-Proto'],
-      xForwardedPort: req.headers['X-Forwarded-Port']
+    } else {
+      req.origin = res
+      req.origin.client = {
+        xForwardedFor: req.headers['X-Forwarded-For'],
+        xForwardedProto: req.headers['X-Forwarded-Proto'],
+        xForwardedPort: req.headers['X-Forwarded-Port']
+      }
     }
 
     next()
