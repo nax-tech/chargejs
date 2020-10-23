@@ -85,12 +85,15 @@ Reads the ca and cert for runtime decryption. Expects files in /app/tls/
 
 ### config.exports.redisConf(config, env, app) ⇒ [<code>redis.config</code>](#external_redis.config)
 Sets up the common redis config object
+time out is 1000 * 60 * 60
+connection attempts > 10
+reconnect after attempts * 100 every 3000ms
 
 **Kind**: static method of [<code>config</code>](#module_config)  
 **Returns**: [<code>redis.config</code>](#external_redis.config) - the redis configuration object  
 **Throws**:
 
-- Will throw an error if the  is incorrect
+- Will throw an error if the connection fails
 
 
 | Param | Type | Description |
@@ -209,10 +212,10 @@ Extend the Error object
 
 **Kind**: static method of [<code>helpers</code>](#module_helpers)  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| message | <code>string</code> | the message for the exception |
-| code | <code>string</code> | the code for the exception |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| message | <code>string</code> | <code>&quot;undefined exception&quot;</code> | the message for the exception |
+| code | <code>string</code> | <code>&quot;undefined code&quot;</code> | the code for the exception |
 
 <a name="module_infra"></a>
 
@@ -296,9 +299,9 @@ A module for common interfaces
         * [.exports.Server](#module_interface.exports.Server)
         * [.exports.standardError](#module_interface.exports.standardError) ⇒ <code>Error</code>
         * [.exports.devErrorHandler](#module_interface.exports.devErrorHandler) ⇒ [<code>express.res</code>](#external_express.res)
+        * [.exports.notFoundErrorHandler](#module_interface.exports.notFoundErrorHandler) ⇒ [<code>express.res</code>](#external_express.res)
         * [.exports.validate](#module_interface.exports.validate) ⇒ [<code>express.res</code>](#external_express.res)
         * [.exports.createControllerRoutes](#module_interface.exports.createControllerRoutes) ⇒ [<code>express.res</code>](#external_express.res)
-        * [.module.exports(req, res, next)](#module_interface.module.exports) ⇒ [<code>express.res</code>](#external_express.res)
     * _inner_
         * [~Server](#module_interface..Server)
             * [new Server(input)](#new_module_interface..Server_new)
@@ -344,6 +347,20 @@ Dev error handler
 | res | [<code>express.res</code>](#external_express.res) | 
 | next | [<code>express.next</code>](#external_express.next) | 
 
+<a name="module_interface.exports.notFoundErrorHandler"></a>
+
+### interface.exports.notFoundErrorHandler ⇒ [<code>express.res</code>](#external_express.res)
+Not found error handler
+
+**Kind**: static constant of [<code>interface</code>](#module_interface)  
+**Returns**: [<code>express.res</code>](#external_express.res) - the express res object  
+
+| Param | Type |
+| --- | --- |
+| req | [<code>express.req</code>](#external_express.req) | 
+| res | [<code>express.res</code>](#external_express.res) | 
+| next | [<code>express.next</code>](#external_express.next) | 
+
 <a name="module_interface.exports.validate"></a>
 
 ### interface.exports.validate ⇒ [<code>express.res</code>](#external_express.res)
@@ -369,20 +386,6 @@ Creates a controller path for the router
 | Param | Type | Description |
 | --- | --- | --- |
 | controllerUri | <code>string</code> | the path to the controller |
-
-<a name="module_interface.module.exports"></a>
-
-### interface.module.exports(req, res, next) ⇒ [<code>express.res</code>](#external_express.res)
-Not found handler
-
-**Kind**: static method of [<code>interface</code>](#module_interface)  
-**Returns**: [<code>express.res</code>](#external_express.res) - the express res object  
-
-| Param | Type |
-| --- | --- |
-| req | [<code>express.req</code>](#external_express.req) | 
-| res | [<code>express.res</code>](#external_express.res) | 
-| next | [<code>express.next</code>](#external_express.next) | 
 
 <a name="module_interface..Server"></a>
 

@@ -14,3 +14,13 @@ export const INVALID_REDIS = {
 export const INVALID_OUTPUT = {
   code: CODES.INVALID_OUTPUT
 }
+
+export const REFUSED_REDIS = {
+  message: 'Redis refused the connection',
+  code: CODES.ECONNREFUSED
+}
+
+export const RETRY_REDIS = {
+  message: 'Retry time exhausted',
+  code: CODES.ECONNREFUSED
+}
