@@ -16,7 +16,7 @@ import deviceIPLocation from 'device-ip-location'
  * 
  */
 export const DeviceMiddleware = (req, res, next) => {
-	device.getInfo(req.headers['user-agent'], req.ip, (err, res) => {
+	deviceIPLocation.getInfo(req.headers['user-agent'], req.ip, (err, res) => {
     req.origin = res
     req.origin.client = {
       xForwardedFor: req.headers['X-Forwarded-For'],
