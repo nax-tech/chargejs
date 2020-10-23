@@ -2,7 +2,12 @@ import fs from 'fs'
 import path from 'path'
 import winston from 'winston'
 import { ALLOWED_ENVIRONMENTS, ALLOWED_PACKAGES, CERTS } from './constants'
-import { INVALID_ENV, INVALID_PACKAGE } from './errors'
+import {
+  INVALID_ENV,
+  INVALID_PACKAGE,
+  REFUSED_REDIS,
+  RETRY_REDIS
+} from './errors'
 import { CustomException } from './helpers'
 /**
  * A module for config functions
@@ -58,12 +63,15 @@ export const certs = (env = undefined) => {
 }
 /**
  * Sets up the common redis config object
+ * time out is 1000 * 60 * 60
+ * connection attempts > 10
+ * reconnect after attempts * 100 every 3000ms
  * @memberof module:config
  * @method
  * @param {object} config the object with redis host and port
  * @param {string} env the environment the app is running, ex: development, dev, stage, production
  * @param {string} app the app. This refers to the package, payments, identity
- * @throws Will throw an error if the  is incorrect
+ * @throws Will throw an error if the connection fails
  * @returns {external:redis.config} the redis configuration object
  */
 export const redisConf = (config, env, app) => {
@@ -84,8 +92,26 @@ export const redisConf = (config, env, app) => {
     host: config.REDISHOST,
     port: config.REDISPORT,
     prefix: getRedisPrefix(env, app),
-    enable_offline_queue: false,
-    tls: {}
+    enable_offline_queue: true,
+    tls: {},
+    retry_strategy: function (options) {
+      if (options.error && options.error.code === 'ECONNREFUSED') {
+        // End reconnecting on a specific error and flush all commands with
+        // a individual error
+        return new CustomException(REFUSED_REDIS.message, REFUSED_REDIS.code)
+      }
+      if (options.total_retry_time > 1000 * 60 * 60) {
+        // End reconnecting after a specific timeout and flush all commands
+        // with a individual error
+        return new CustomException(RETRY_REDIS.message, RETRY_REDIS.code)
+      }
+      if (options.attempt > 10) {
+        // End reconnecting with built in error
+        return undefined
+      }
+      // reconnect after
+      return Math.min(options.attempt * 100, 3000)
+    }
   }
   if (env === 'development') {
     delete redisConf.tls

@@ -95,6 +95,7 @@ export const devErrorHandler = (err, req, res, next) => {
     error: {
       type: err.type,
       message: err.message,
+      errors: err.errors,
       stack: err.stack
     }
   })
@@ -114,11 +115,12 @@ export const devErrorHandler = (err, req, res, next) => {
 export const errorHandler = (err, req, res, next) => {
   res.status(Status.INTERNAL_SERVER_ERROR).json({
     type: 'InternalServerError',
-    message: 'The server failed to handle this request'
+    message: 'The server failed to handle this request',
+    errors: err.errors
   })
 }
 /**
- * Not found handler
+ * Not found error handler
  *
  * @memberof module:interface
  * @param {external:express.req} req
@@ -126,7 +128,7 @@ export const errorHandler = (err, req, res, next) => {
  * @param {external:express.next} next
  * @returns {external:express.res} the express res object
  */
-export default (req, res, next) => {
+export const notFoundErrorHandler = (req, res, next) => {
   res.status(Status.NOT_FOUND).send({
     error: {
       type: Status['404_NAME'],
