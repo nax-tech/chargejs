@@ -114,8 +114,10 @@ export const devErrorHandler = (err, req, res, next) => {
  */
 export const deviceMiddleware = (req, res, next) => {
   deviceIPLocation.getInfo(req.headers['user-agent'], req.ip, (err, res) => {
-    if (err !== undefined) {
-      devErrorHandler(err, req, res, next)
+    if (err) {
+      req.origin = { error: err }
+
+      next()
     }
 
     req.origin = res
