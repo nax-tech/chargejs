@@ -3,10 +3,11 @@ Object.defineProperty(exports, '__esModule', {
 })
 
 module.exports = {
-  config: require('./config'),
   app: require('./app'),
+  config: require('./config'),
+  device: require('./device'),
   domain: require('./domain'),
   infra: require('./infra'),
   interfaces: require('./interfaces'),
-  service: require('./service')
+  service: require('./service'),
 }
