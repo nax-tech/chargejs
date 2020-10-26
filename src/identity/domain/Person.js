@@ -77,7 +77,8 @@ const Person = attributes(
     },
     status: {
       type: String,
-      required: false
+      required: false,
+      default: 'new'
     },
     step: {
       type: String,
