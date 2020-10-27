@@ -40,6 +40,7 @@
     "standard": "^14.3.3"
   },
   "dependencies": {
+    "ein-validator": "^1.0.0",
     "device-ip-location": "^1.0.27",
     "esm": "^3.2.25",
     "express": "^4.17.1",

@@ -1,6 +1,24 @@
 import BaseDomain from '../../domain'
+import { mask } from 'ein-validator'
 
 const { attributes } = require('structure')
+
+const allowedUpdatableFields = [
+  'step',
+  'identifier',
+  'firstName',
+  'lastName',
+  'email',
+  'phoneNumber',
+  'addressA',
+  'addressB',
+  'city',
+  'zip',
+  'country',
+  'dob',
+  'taxId',
+  'meta'
+]
 /**
  * A domain type module
  * @module domain
@@ -60,7 +78,8 @@ const Person = attributes(
     },
     status: {
       type: String,
-      required: false
+      required: false,
+      default: 'pending'
     },
     step: {
       type: String,
@@ -300,6 +319,26 @@ const Person = attributes(
      */
     addTaxId (taxId) {
       return this.set('taxId', taxId)
+    }
+
+    /**
+     * hides first digests of the taxId field
+     * @memberof module:domain.Person
+     * @returns {void}
+     */
+    hideTaxId () {
+      if (this.taxId) {
+        return this.set('taxId', mask(this.taxId))
+      }
+    }
+
+    /**
+     * gets the allowed updated fields
+     * @memberof module:domain.Person
+     * @returns {string[]}
+     */
+    getUpdatableFields () {
+      return allowedUpdatableFields
     }
   }
 )
