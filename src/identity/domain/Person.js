@@ -1,4 +1,5 @@
 import BaseDomain from '../../domain'
+import { mask } from 'ein-validator'
 
 const { attributes } = require('structure')
 
@@ -318,6 +319,17 @@ const Person = attributes(
      */
     addTaxId (taxId) {
       return this.set('taxId', taxId)
+    }
+
+    /**
+     * hides first digests of the taxId field
+     * @memberof module:domain.Person
+     * @returns {void}
+     */
+    hideTaxId () {
+      if (this.taxId) {
+        return this.set('taxId', mask(this.taxId))
+      }
     }
 
     /**
