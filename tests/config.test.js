@@ -95,6 +95,7 @@ describe('config', function () {
     })
     it('it should return valid object', function () {
       const valid = config.redisConf(configStub, devEnv, payments)
+      delete valid.retry_strategy
       assert.deepStrictEqual(
         valid,
         redisConfReturn(configStub, devEnv, payments, config.getRedisPrefix)
@@ -102,6 +103,7 @@ describe('config', function () {
     })
     it('it should return valid object without tls if env = development', function () {
       const valid = config.redisConf(configStub, 'development', payments)
+      delete valid.retry_strategy
       const returnValue = redisConfReturn(
         configStub,
         'development',

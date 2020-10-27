@@ -10,7 +10,10 @@
  * @param {string} code the code for the exception
  * @returns {Error}
  */
-function CustomException (message, code) {
+function CustomException (
+  message = 'undefined exception',
+  code = 'undefined code'
+) {
   const error = new Error(message)
 
   error.code = code

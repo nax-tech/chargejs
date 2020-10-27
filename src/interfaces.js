@@ -1,3 +1,4 @@
+import deviceIPLocation from 'device-ip-location'
 import path from 'path'
 import express from 'express'
 import http from 'http'
@@ -95,8 +96,36 @@ export const devErrorHandler = (err, req, res, next) => {
     error: {
       type: err.type,
       message: err.message,
+      errors: err.errors,
       stack: err.stack
     }
+  })
+}
+
+/**
+ * Sets device infor available in req object for access in controllers
+ * @memberof interfaces
+ * @method
+ * @param {http.ClientRequest} a native js http client request object
+ * @param {http.ServerResponse} a native js http server response object
+ * @param {function}
+ * @returns {function}
+ *
+ */
+export const deviceMiddleware = (req, res, next) => {
+  deviceIPLocation.getInfo(req.headers['user-agent'], req.ip, (err, res) => {
+    if (err) {
+      req.origin = { error: err }
+    } else {
+      req.origin = res
+      req.origin.client = {
+        xForwardedFor: req.headers['X-Forwarded-For'],
+        xForwardedProto: req.headers['X-Forwarded-Proto'],
+        xForwardedPort: req.headers['X-Forwarded-Port']
+      }
+    }
+
+    next()
   })
 }
 
@@ -114,11 +143,12 @@ export const devErrorHandler = (err, req, res, next) => {
 export const errorHandler = (err, req, res, next) => {
   res.status(Status.INTERNAL_SERVER_ERROR).json({
     type: 'InternalServerError',
-    message: 'The server failed to handle this request'
+    message: 'The server failed to handle this request',
+    errors: err.errors
   })
 }
 /**
- * Not found handler
+ * Not found error handler
  *
  * @memberof module:interface
  * @param {external:express.req} req
@@ -126,7 +156,7 @@ export const errorHandler = (err, req, res, next) => {
  * @param {external:express.next} next
  * @returns {external:express.res} the express res object
  */
-export default (req, res, next) => {
+export const notFoundErrorHandler = (req, res, next) => {
   res.status(Status.NOT_FOUND).send({
     error: {
       type: Status['404_NAME'],
