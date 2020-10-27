@@ -7,7 +7,7 @@ The Charge Core javascript implementation.
 
 ## Install
 
-`npm install chargejs`
+`npm install @charge-tech/chargejs`
 
 To import the core library:
 
@@ -15,7 +15,7 @@ To import the core library:
 
 To import specific packages:
 
-`import { redis } from 'chargejs'`
+`import { interfaces } from 'chargejs'`
 
 ## Usage
 
