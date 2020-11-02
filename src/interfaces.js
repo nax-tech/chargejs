@@ -103,13 +103,12 @@ export const devErrorHandler = (err, req, res, next) => {
 }
 
 /**
- * Sets device infor available in req object for access in controllers
- * @memberof interfaces
- * @method
- * @param {http.ClientRequest} a native js http client request object
- * @param {http.ServerResponse} a native js http server response object
- * @param {function}
- * @returns {function}
+ * Sets device info available in req.origin for access in controllers
+ * @memberof module:interface
+ * @param {external:express.req} req
+ * @param {external:express.res} res
+ * @param {external:express.next} next
+ * @returns {void}
  *
  */
 export const deviceMiddleware = (req, res, next) => {
@@ -193,6 +192,36 @@ export const validate = (req, res, next) => {
       errors: extractedErrors
     }
   })
+}
+
+/**
+ * Base64 encode an input
+ * This is used to encode req.origin so it can be set to the header x-origin as a string
+ * in the api-gateway proxy for a given request
+ *
+ * @memberof module:interface
+ * @param {object} origin the req.origin object to encode
+ * @returns {string}
+ */
+export const originEncoder = origin => {
+  return Buffer.from(JSON.stringify(origin)).toString('base64')
+}
+
+/**
+ * Base64 decode the x-origin header and set it to req.origin
+ * This is used to decode the encoded header coming from the api-gateway
+ *
+ * @memberof module:interface
+ * @param {external:express.req} req
+ * @param {external:express.res} res
+ * @param {external:express.next} next
+ * @returns {void}
+ */
+export const originDecoder = (req, res, next) => {
+  if (req.headers['x-origin']) {
+    req.origin = JSON.parse(Buffer.from(req.headers['x-origin'], 'base64'))
+  }
+  next()
 }
 
 /**

@@ -299,8 +299,11 @@ A module for common interfaces
         * [.exports.Server](#module_interface.exports.Server)
         * [.exports.standardError](#module_interface.exports.standardError) ⇒ <code>Error</code>
         * [.exports.devErrorHandler](#module_interface.exports.devErrorHandler) ⇒ [<code>express.res</code>](#external_express.res)
+        * [.exports.deviceMiddleware](#module_interface.exports.deviceMiddleware) ⇒ <code>void</code>
         * [.exports.notFoundErrorHandler](#module_interface.exports.notFoundErrorHandler) ⇒ [<code>express.res</code>](#external_express.res)
         * [.exports.validate](#module_interface.exports.validate) ⇒ [<code>express.res</code>](#external_express.res)
+        * [.exports.originEncoder](#module_interface.exports.originEncoder) ⇒ <code>string</code>
+        * [.exports.originDecoder](#module_interface.exports.originDecoder) ⇒ <code>void</code>
         * [.exports.createControllerRoutes](#module_interface.exports.createControllerRoutes) ⇒ [<code>express.res</code>](#external_express.res)
     * _inner_
         * [~Server](#module_interface..Server)
@@ -347,6 +350,19 @@ Dev error handler
 | res | [<code>express.res</code>](#external_express.res) | 
 | next | [<code>express.next</code>](#external_express.next) | 
 
+<a name="module_interface.exports.deviceMiddleware"></a>
+
+### interface.exports.deviceMiddleware ⇒ <code>void</code>
+Sets device info available in req.origin for access in controllers
+
+**Kind**: static constant of [<code>interface</code>](#module_interface)  
+
+| Param | Type |
+| --- | --- |
+| req | [<code>express.req</code>](#external_express.req) | 
+| res | [<code>express.res</code>](#external_express.res) | 
+| next | [<code>express.next</code>](#external_express.next) | 
+
 <a name="module_interface.exports.notFoundErrorHandler"></a>
 
 ### interface.exports.notFoundErrorHandler ⇒ [<code>express.res</code>](#external_express.res)
@@ -368,6 +384,33 @@ Validate request handler
 
 **Kind**: static constant of [<code>interface</code>](#module_interface)  
 **Returns**: [<code>express.res</code>](#external_express.res) - the express res object  
+
+| Param | Type |
+| --- | --- |
+| req | [<code>express.req</code>](#external_express.req) | 
+| res | [<code>express.res</code>](#external_express.res) | 
+| next | [<code>express.next</code>](#external_express.next) | 
+
+<a name="module_interface.exports.originEncoder"></a>
+
+### interface.exports.originEncoder ⇒ <code>string</code>
+Base64 encode an input
+This is used to encode req.origin so it can be set to the header x-origin as a string
+in the api-gateway proxy for a given request
+
+**Kind**: static constant of [<code>interface</code>](#module_interface)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| origin | <code>object</code> | the req.origin object to encode |
+
+<a name="module_interface.exports.originDecoder"></a>
+
+### interface.exports.originDecoder ⇒ <code>void</code>
+Base64 decode the x-origin header and set it to req.origin
+This is used to decode the encoded header coming from the api-gateway
+
+**Kind**: static constant of [<code>interface</code>](#module_interface)  
 
 | Param | Type |
 | --- | --- |
