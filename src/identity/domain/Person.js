@@ -156,7 +156,7 @@ const Person = attributes(
   },
   {
     dynamics: {
-      Image: () => require('./Image')
+      Image: () => require('./Image').default
     }
   }
 )(
