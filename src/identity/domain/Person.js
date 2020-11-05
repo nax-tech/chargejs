@@ -139,11 +139,7 @@ const Person = attributes(
     },
     images: {
       type: Array,
-      itemType: 'Image',
-      required: false,
-      default: [],
-      empty: true,
-      nullable: true
+      itemType: require('./Image').default
     },
     updatedAt: {
       type: Date,
@@ -152,11 +148,6 @@ const Person = attributes(
     createdAt: {
       type: Date,
       required: false
-    }
-  },
-  {
-    dynamics: {
-      Image: () => require('./Image').default
     }
   }
 )(
