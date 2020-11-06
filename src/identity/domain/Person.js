@@ -70,7 +70,8 @@ const Person = attributes(
     },
     externalId: {
       type: String,
-      required: false
+      required: false,
+      empty: true
     },
     profile: {
       type: String,
