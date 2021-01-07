@@ -17,7 +17,7 @@ export class BaseDomain {
    * @param {string} id user uuid
    * @returns {void}
    */
-  addUserId (id) {
+  addUserId(id) {
     return this.set('userId', id)
   }
 
@@ -26,7 +26,7 @@ export class BaseDomain {
    * @memberof module:domain.BaseDomain
    * @param {string} number the account number as a string
    */
-  setMasked (number = '1234567890') {
+  setMasked(number = '1234567890') {
     return this.set(
       'masked',
       number.slice(0, -4).replace(/./g, 'x') + number.slice(-4)
@@ -40,7 +40,7 @@ export class BaseDomain {
    * @param {object} fields the object with the fields to update
    * @returns {object}
    */
-  sanitize (fields = {}, allowedUpdatableFields = []) {
+  sanitize(fields = {}, allowedUpdatableFields = []) {
     const update = {}
     allowedUpdatableFields.forEach(field => {
       if (field in fields) {
@@ -55,7 +55,7 @@ export class BaseDomain {
    * @memberof module:domain.BaseDomain
    * @returns {object}
    */
-  setMeta (metaObject) {
+  setMeta(metaObject) {
     return this.set('meta', metaObject)
   }
 }
