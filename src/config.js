@@ -162,3 +162,210 @@ export const logging = (env, app) => {
     ]
   }
 }
+
+/**
+ * The type of notifications the system sends to users
+ * @memberof module:config
+ */
+export const NOTIFICATION_KIND = {
+  push: 'push',
+  email: 'email'
+}
+/**
+ * The source of notifications.
+ * This is used by the notification coordinator queue to coordinate notifications.
+ * It is added into the name of the message queue as `${NOTIFICATION_SOURCE_TYPES.address}:${NOTIFICATION_TYPES.updated}`
+ * @memberof module:config
+ */
+export const NOTIFICATION_SOURCE_TYPES = {
+  email: 'email',
+  password: 'password',
+  phone: 'phone',
+  address: 'address',
+  pin: 'pin',
+  support: 'support',
+  transactions: 'transactions',
+  cards: 'cards'
+}
+/**
+ * The type of notifications.
+ * This is used by the notification coordinator queue to coordinate notifications.
+ * It is added into the name of the message queue as `${NOTIFICATION_SOURCE_TYPES.address}:${NOTIFICATION_TYPES.updated}`
+ * @memberof module:config
+ */
+export const NOTIFICATION_TYPES = {
+  updated: 'updated',
+  accepted: 'accepted',
+  declined: 'declined',
+  verification: 'verification',
+  verified: 'verified',
+  new: 'new',
+  enabled: 'enabled'
+}
+/**
+ * The copy for the push notifications
+ * @memberof module:config
+ */
+export const NOTIFICATION_PUSH = {
+  payment: {
+    new: {
+      title: 'New Payment',
+      body: 'has sent you a new payment card. Tap to view and accept your payment.'
+    },
+    accepted: {
+      title: 'Payment Accepted',
+      body: 'You have accepted payment from'
+    },
+    declined: {
+      title: 'Payment Declined',
+      body: 'You have declined payment from'
+    }
+  },
+  profile: {
+    email: {
+      updated: {
+        title: 'Email Address Updated',
+        body: 'Your email address has been successfully updated!'
+      }
+    },
+    phone: {
+      updated: {
+        title: 'Phone Number Updated',
+        body: 'Your phone number has been updated!'
+      }
+    },
+    address: {
+      added: {
+        title: 'New Address Added',
+        body: 'Your address has been successfully added!'
+      },
+      updated: {
+        title: 'Address Updated',
+        body: 'Your address has been successfully updated!'
+      }
+    },
+    pin: {
+      enabled: {
+        title: 'Touch ID & PIN Enabled',
+        body: 'Touch ID & PIN has successfully been enabled!'
+      },
+      updated: {
+        title: 'PIN Code Updated',
+        body: 'Your PIN code has been successfully updated!'
+      }
+    }
+  }
+}
+/**
+ * Creates the initial notification array for a new user
+ * @memberof module:config
+ * @method
+ * @param {string} settingsId the uuid of the settings
+ * @returns {Array<Object>} the array of settings
+ */
+export const createNotifications = (settingsId) => {
+  return [
+    {
+      settingsId,
+      kind: NOTIFICATION_KIND.email,
+      sourceType: NOTIFICATION_SOURCE_TYPES.email,
+      type: NOTIFICATION_TYPES.verification
+    },
+    {
+      settingsId,
+      kind: NOTIFICATION_KIND.email,
+      sourceType: NOTIFICATION_SOURCE_TYPES.email,
+      type: NOTIFICATION_TYPES.verified
+    },
+    {
+      settingsId,
+      kind: NOTIFICATION_KIND.email,
+      sourceType: NOTIFICATION_SOURCE_TYPES.email,
+      type: NOTIFICATION_TYPES.new
+    },
+    {
+      settingsId,
+      kind: NOTIFICATION_KIND.email,
+      sourceType: NOTIFICATION_SOURCE_TYPES.password,
+      type: NOTIFICATION_TYPES.verification
+    },
+    {
+      settingsId,
+      kind: NOTIFICATION_KIND.email,
+      sourceType: NOTIFICATION_SOURCE_TYPES.password,
+      type: NOTIFICATION_TYPES.updated
+    },
+    {
+      settingsId,
+      kind: NOTIFICATION_KIND.email,
+      sourceType: NOTIFICATION_SOURCE_TYPES.support,
+      type: NOTIFICATION_TYPES.new
+    },
+    {
+      settingsId,
+      kind: NOTIFICATION_KIND.email,
+      sourceType: NOTIFICATION_SOURCE_TYPES.cards,
+      type: NOTIFICATION_TYPES.new
+    },
+    {
+      settingsId,
+      kind: NOTIFICATION_KIND.email,
+      sourceType: NOTIFICATION_SOURCE_TYPES.cards,
+      type: NOTIFICATION_TYPES.accepted
+    },
+    {
+      settingsId,
+      kind: NOTIFICATION_KIND.push,
+      sourceType: NOTIFICATION_SOURCE_TYPES.email,
+      type: NOTIFICATION_TYPES.updated
+    },
+    {
+      settingsId,
+      kind: NOTIFICATION_KIND.push,
+      sourceType: NOTIFICATION_SOURCE_TYPES.phone,
+      type: NOTIFICATION_TYPES.updated
+    },
+    {
+      settingsId,
+      kind: NOTIFICATION_KIND.push,
+      sourceType: NOTIFICATION_SOURCE_TYPES.address,
+      type: NOTIFICATION_TYPES.new
+    },
+    {
+      settingsId,
+      kind: NOTIFICATION_KIND.push,
+      sourceType: NOTIFICATION_SOURCE_TYPES.address,
+      type: NOTIFICATION_TYPES.updated
+    },
+    {
+      settingsId,
+      kind: NOTIFICATION_KIND.push,
+      sourceType: NOTIFICATION_SOURCE_TYPES.pin,
+      type: NOTIFICATION_TYPES.enabled
+    },
+    {
+      settingsId,
+      kind: NOTIFICATION_KIND.push,
+      sourceType: NOTIFICATION_SOURCE_TYPES.pin,
+      type: NOTIFICATION_TYPES.updated
+    },
+    {
+      settingsId,
+      kind: NOTIFICATION_KIND.push,
+      sourceType: NOTIFICATION_SOURCE_TYPES.cards,
+      type: NOTIFICATION_TYPES.new
+    },
+    {
+      settingsId,
+      kind: NOTIFICATION_KIND.push,
+      sourceType: NOTIFICATION_SOURCE_TYPES.cards,
+      type: NOTIFICATION_TYPES.accepted
+    },
+    {
+      settingsId,
+      kind: NOTIFICATION_KIND.push,
+      sourceType: NOTIFICATION_SOURCE_TYPES.cards,
+      type: NOTIFICATION_TYPES.declined
+    }
+  ]
+}
