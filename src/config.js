@@ -1,7 +1,15 @@
 import fs from 'fs'
 import path from 'path'
 import winston from 'winston'
-import { ALLOWED_ENVIRONMENTS, ALLOWED_PACKAGES, CERTS } from './constants'
+import {
+  ALLOWED_ENVIRONMENTS,
+  ALLOWED_PACKAGES,
+  CERTS,
+  KIND,
+  SOURCE_TYPES,
+  TYPES,
+  NOTIFICATION_PUSH_COPY
+} from './constants'
 import {
   INVALID_ENV,
   INVALID_PACKAGE,
@@ -168,8 +176,8 @@ export const logging = (env, app) => {
  * @memberof module:config
  */
 export const NOTIFICATION_KIND = {
-  push: 'push',
-  email: 'email'
+  push: KIND.PUSH,
+  email: KIND.EMAIL
 }
 /**
  * The source of notifications.
@@ -178,14 +186,14 @@ export const NOTIFICATION_KIND = {
  * @memberof module:config
  */
 export const NOTIFICATION_SOURCE_TYPES = {
-  email: 'email',
-  password: 'password',
-  phone: 'phone',
-  address: 'address',
-  pin: 'pin',
-  support: 'support',
-  transactions: 'transactions',
-  cards: 'cards'
+  email: SOURCE_TYPES.EMAIL,
+  password: SOURCE_TYPES.PASSWORD,
+  phone: SOURCE_TYPES.PHONE,
+  address: SOURCE_TYPES.ADDRESS,
+  pin: SOURCE_TYPES.PIN,
+  support: SOURCE_TYPES.SUPPORT,
+  transactions: SOURCE_TYPES.TRANSACTIONS,
+  cards: SOURCE_TYPES.CARDS
 }
 /**
  * The type of notifications.
@@ -194,13 +202,13 @@ export const NOTIFICATION_SOURCE_TYPES = {
  * @memberof module:config
  */
 export const NOTIFICATION_TYPES = {
-  updated: 'updated',
-  accepted: 'accepted',
-  declined: 'declined',
-  verification: 'verification',
-  verified: 'verified',
-  new: 'new',
-  enabled: 'enabled'
+  updated: TYPES.UPDATED,
+  accepted: TYPES.ACCEPTED,
+  declined: TYPES.DECLINED,
+  verification: TYPES.VERIFICATION,
+  verified: TYPES.VERIFICATION,
+  new: TYPES.NEW,
+  enabled: TYPES.ENABLED
 }
 /**
  * The copy for the push notifications
@@ -209,49 +217,49 @@ export const NOTIFICATION_TYPES = {
 export const NOTIFICATION_PUSH = {
   payment: {
     new: {
-      title: 'New Payment',
-      body: 'has sent you a new payment card. Tap to view and accept your payment.'
+      title: NOTIFICATION_PUSH_COPY.PAYMENT.NEW.TITLE,
+      body: NOTIFICATION_PUSH_COPY.PAYMENT.NEW.BODY
     },
     accepted: {
-      title: 'Payment Accepted',
-      body: 'You have accepted payment from'
+      title: NOTIFICATION_PUSH_COPY.PAYMENT.ACCEPTED.TITLE,
+      body: NOTIFICATION_PUSH_COPY.PAYMENT.ACCEPTED.BODY
     },
     declined: {
-      title: 'Payment Declined',
-      body: 'You have declined payment from'
+      title: NOTIFICATION_PUSH_COPY.PAYMENT.DECLINED.TITLE,
+      body: NOTIFICATION_PUSH_COPY.PAYMENT.DECLINED.BODY
     }
   },
   profile: {
     email: {
       updated: {
-        title: 'Email Address Updated',
-        body: 'Your email address has been successfully updated!'
+        title: NOTIFICATION_PUSH_COPY.PROFILE.EMAIL.UPDATED.TITLE,
+        body: NOTIFICATION_PUSH_COPY.PROFILE.EMAIL.UPDATED.BODY
       }
     },
     phone: {
       updated: {
-        title: 'Phone Number Updated',
-        body: 'Your phone number has been updated!'
+        title: NOTIFICATION_PUSH_COPY.PROFILE.PHONE.UPDATED.TITLE,
+        body: NOTIFICATION_PUSH_COPY.PROFILE.PHONE.UPDATED.BODY
       }
     },
     address: {
       added: {
-        title: 'New Address Added',
-        body: 'Your address has been successfully added!'
+        title: NOTIFICATION_PUSH_COPY.PROFILE.ADDRESS.ADDED.TITLE,
+        body: NOTIFICATION_PUSH_COPY.PROFILE.ADDRESS.ADDED.BODY
       },
       updated: {
-        title: 'Address Updated',
-        body: 'Your address has been successfully updated!'
+        title: NOTIFICATION_PUSH_COPY.PROFILE.ADDRESS.UPDATED.TITLE,
+        body: NOTIFICATION_PUSH_COPY.PROFILE.ADDRESS.UPDATED.BODY
       }
     },
     pin: {
       enabled: {
-        title: 'Touch ID & PIN Enabled',
-        body: 'Touch ID & PIN has successfully been enabled!'
+        title: NOTIFICATION_PUSH_COPY.PROFILE.PIN.ENABLED.TITLE,
+        body: NOTIFICATION_PUSH_COPY.PROFILE.PIN.ENABLED.BODY
       },
       updated: {
-        title: 'PIN Code Updated',
-        body: 'Your PIN code has been successfully updated!'
+        title: NOTIFICATION_PUSH_COPY.PROFILE.PIN.UPDATED.TITLE,
+        body: NOTIFICATION_PUSH_COPY.PROFILE.PIN.UPDATED.BODY
       }
     }
   }
