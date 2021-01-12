@@ -1,14 +1,14 @@
 import fs from 'fs'
 import path from 'path'
 import winston from 'winston'
-import { 
-  ALLOWED_ENVIRONMENTS, 
-  ALLOWED_PACKAGES, 
-  CERTS, 
-  KIND, 
-  SOURCE_TYPES, 
-  TYPES, 
-  NOTIFICATION_PUSH_COPY 
+import {
+  ALLOWED_ENVIRONMENTS,
+  ALLOWED_PACKAGES,
+  CERTS,
+  KIND,
+  SOURCE_TYPES,
+  TYPES,
+  NOTIFICATION_PUSH_COPY
 } from './constants'
 import {
   INVALID_ENV,
@@ -217,7 +217,7 @@ export const NOTIFICATION_TYPES = {
 export const NOTIFICATION_PUSH = {
   payment: {
     new: {
-      title: NOTIFICATION_PUSH_COPY.PAYMENT.NEW.TITLE
+      title: NOTIFICATION_PUSH_COPY.PAYMENT.NEW.TITLE,
       body: NOTIFICATION_PUSH_COPY.PAYMENT.NEW.BODY
     },
     accepted: {
@@ -226,14 +226,14 @@ export const NOTIFICATION_PUSH = {
     },
     declined: {
       title: NOTIFICATION_PUSH_COPY.PAYMENT.DECLINED.TITLE,
-      body: NOTIFICATION_PUSH_COPY.PAYMENT.DECLINED.BODY,
+      body: NOTIFICATION_PUSH_COPY.PAYMENT.DECLINED.BODY
     }
   },
   profile: {
     email: {
       updated: {
         title: NOTIFICATION_PUSH_COPY.PROFILE.EMAIL.UPDATED.TITLE,
-        body:  NOTIFICATION_PUSH_COPY.PROFILE.EMAIL.UPDATED.BODY,
+        body: NOTIFICATION_PUSH_COPY.PROFILE.EMAIL.UPDATED.BODY
       }
     },
     phone: {
@@ -245,7 +245,7 @@ export const NOTIFICATION_PUSH = {
     address: {
       added: {
         title: NOTIFICATION_PUSH_COPY.PROFILE.ADDRESS.ADDED.TITLE,
-        body:  NOTIFICATION_PUSH_COPY.PROFILE.ADDRESS.ADDED.BODY
+        body: NOTIFICATION_PUSH_COPY.PROFILE.ADDRESS.ADDED.BODY
       },
       updated: {
         title: NOTIFICATION_PUSH_COPY.PROFILE.ADDRESS.UPDATED.TITLE,
