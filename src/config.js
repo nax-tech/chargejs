@@ -206,7 +206,7 @@ export const NOTIFICATION_TYPES = {
   accepted: TYPES.ACCEPTED,
   declined: TYPES.DECLINED,
   verification: TYPES.VERIFICATION,
-  verified: TYPES.VERIFICATION,
+  verified: TYPES.VERIFIED,
   new: TYPES.NEW,
   enabled: TYPES.ENABLED
 }
