@@ -41,13 +41,15 @@ export const SOURCE_TYPES = {
 }
 
 export const TYPES = {
+  DEFAULT: 'default',
   UPDATED: 'updated',
   ACCEPTED: 'accepted',
   DECLINED: 'declined',
   VERIFICATION: 'verification',
   VERIFIED: 'verified',
   NEW: 'newItem',
-  ENABLED: 'enabled'
+  ENABLED: 'enabled',
+  DISABLED: 'disabled'
 }
 
 export const KIND = {
@@ -63,11 +65,11 @@ export const NOTIFICATION_PUSH_COPY = {
     },
     ACCEPTED: {
       TITLE: 'Payment Accepted',
-      BODY: 'You have accepted payment from'
+      BODY: 'You have accepted a payment from'
     },
     DECLINED: {
       TITLE: 'Payment Declined',
-      BODY: 'You have declined payment from'
+      BODY: 'You have declined a payment from'
     }
   },
   PROFILE: {
@@ -91,12 +93,20 @@ export const NOTIFICATION_PUSH_COPY = {
       UPDATED: {
         TITLE: 'Address Updated',
         BODY: 'Your address has been successfully updated!'
+      },
+      DEFAULT: {
+        TITLE: 'Default Address Changed',
+        BODY: 'Your default address has been successfully changed!'
       }
     },
     PIN: {
       ENABLED: {
         TITLE: 'Touch ID & PIN Enabled',
         BODY: 'Touch ID & PIN has successfully been enabled!'
+      },
+      DISABLED: {
+        TITLE: 'Touch ID & PIN Disabled',
+        BODY: 'Touch ID & PIN has successfully been disabled!'
       },
       UPDATED: {
         TITLE: 'PIN Code Updated',
