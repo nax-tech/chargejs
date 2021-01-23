@@ -70,7 +70,8 @@ const Person = attributes(
     },
     externalId: {
       type: String,
-      required: false
+      required: false,
+      empty: true
     },
     profile: {
       type: String,
@@ -139,11 +140,7 @@ const Person = attributes(
     },
     images: {
       type: Array,
-      itemType: 'Image',
-      required: false,
-      default: [],
-      empty: true,
-      nullable: true
+      itemType: require('./Image').default
     },
     updatedAt: {
       type: Date,
@@ -152,11 +149,6 @@ const Person = attributes(
     createdAt: {
       type: Date,
       required: false
-    }
-  },
-  {
-    dynamics: {
-      Image: () => require('./Image')
     }
   }
 )(
