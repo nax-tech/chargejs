@@ -202,13 +202,15 @@ export const NOTIFICATION_SOURCE_TYPES = {
  * @memberof module:config
  */
 export const NOTIFICATION_TYPES = {
+  default: TYPES.DEFAULT,
   updated: TYPES.UPDATED,
   accepted: TYPES.ACCEPTED,
   declined: TYPES.DECLINED,
   verification: TYPES.VERIFICATION,
   verified: TYPES.VERIFIED,
   new: TYPES.NEW,
-  enabled: TYPES.ENABLED
+  enabled: TYPES.ENABLED,
+  disabled: TYPES.DISABLED
 }
 /**
  * The copy for the push notifications
@@ -250,12 +252,20 @@ export const NOTIFICATION_PUSH = {
       updated: {
         title: NOTIFICATION_PUSH_COPY.PROFILE.ADDRESS.UPDATED.TITLE,
         body: NOTIFICATION_PUSH_COPY.PROFILE.ADDRESS.UPDATED.BODY
+      },
+      default: {
+        title: NOTIFICATION_PUSH_COPY.PROFILE.ADDRESS.DEFAULT.TITLE,
+        body: NOTIFICATION_PUSH_COPY.PROFILE.ADDRESS.DEFAULT.BODY
       }
     },
     pin: {
       enabled: {
         title: NOTIFICATION_PUSH_COPY.PROFILE.PIN.ENABLED.TITLE,
         body: NOTIFICATION_PUSH_COPY.PROFILE.PIN.ENABLED.BODY
+      },
+      disabled: {
+        title: NOTIFICATION_PUSH_COPY.PROFILE.PIN.DISABLED.TITLE,
+        body: NOTIFICATION_PUSH_COPY.PROFILE.PIN.DISABLED.BODY
       },
       updated: {
         title: NOTIFICATION_PUSH_COPY.PROFILE.PIN.UPDATED.TITLE,
