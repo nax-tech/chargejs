@@ -1,4 +1,4 @@
-import { ALLOWED_ENVIRONMENTS, ALLOWED_PACKAGES, CODES } from './constants'
+import { ALLOWED_ENVIRONMENTS, ALLOWED_PACKAGES, CODES } from '../constants'
 export const INVALID_ENV = {
   message: `Invalid environment. Allowed values ${ALLOWED_ENVIRONMENTS}`,
   code: CODES.INVALID_ENV

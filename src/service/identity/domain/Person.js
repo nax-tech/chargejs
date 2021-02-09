@@ -1,4 +1,4 @@
-import BaseDomain from '../../domain'
+import BaseDomain from '../../../domain'
 import { mask } from 'ein-validator'
 
 const { attributes } = require('structure')

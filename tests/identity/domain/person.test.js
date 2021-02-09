@@ -1,5 +1,5 @@
 import assert from 'assert'
-import Person from '../../../src/identity/domain/Person'
+import Person from 'src/service/identity/domain/Person'
 let person
 describe('domain', function () {
   describe('person', function () {

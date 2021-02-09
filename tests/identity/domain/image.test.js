@@ -1,5 +1,5 @@
 import assert from 'assert'
-import Image from '../../../src/identity/domain/Image'
+import Image from 'src/service/identity/domain/Image'
 let image
 describe('domain', function () {
   describe('image', function () {

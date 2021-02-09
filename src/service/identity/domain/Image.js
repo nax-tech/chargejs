@@ -1,4 +1,4 @@
-import BaseDomain from '../../domain'
+import BaseDomain from '../../../domain'
 
 const { attributes } = require('structure')
 /**

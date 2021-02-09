@@ -9,14 +9,14 @@ import {
   SOURCE_TYPES,
   TYPES,
   NOTIFICATION_PUSH_COPY
-} from './constants'
+} from '../constants'
 import {
   INVALID_ENV,
   INVALID_PACKAGE,
   REFUSED_REDIS,
   RETRY_REDIS
-} from './errors'
-import { CustomException } from './helpers'
+} from '../errors'
+import { CustomException } from '../helpers'
 /**
  * A module for config functions
  * @module config
