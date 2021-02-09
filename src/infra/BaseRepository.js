@@ -1,3 +1,10 @@
+import {
+  INVALID_PATCH_FIELDS,
+  CACHE_DISABLED,
+  SEQUELIZE_NOT_FOUNT_ERROR,
+  SEQUELIZE_VALIDATION_ERROR
+} from '../errors'
+
 /**
  * A infra type module
  * @module infra
@@ -228,9 +235,9 @@ class BaseRepository {
       return this.mapper.toEntity(result.toJSON())
     } catch (error) {
       switch (error.name) {
-        case 'SequelizeValidationError':
+        case SEQUELIZE_VALIDATION_ERROR.code:
           throw this._getValidationError(error.errors)
-        case 'SequelizeEmptyResultError':
+        case SEQUELIZE_NOT_FOUNT_ERROR.code:
           throw this._getNotFoundError()
         default:
           throw error
@@ -315,8 +322,8 @@ class BaseRepository {
   _filterPatchFields (updateFields) {
     if (!this.patchAllowedFields) {
       // Error for developers only, can only occur if the patchAllowedFields configuration is incorrect
-      const error = new Error('patchAllowedFields was not configured in init function')
-      error.type = 'InvalidPatchAllowedFields'
+      const error = new Error(INVALID_PATCH_FIELDS.message)
+      error.type = INVALID_PATCH_FIELDS.code
       throw error
     }
     return Object.keys(updateFields)
@@ -373,8 +380,8 @@ class BaseRepository {
 
   _getCacheDisabledError () {
     // Error for developers only, can only occur if the disableCache configuration is incorrect
-    const error = new Error('disableCache option was set to true, please provide provide disableCache: false option to use caching.')
-    error.type = 'CacheDisabledError'
+    const error = new Error(CACHE_DISABLED.message)
+    error.type = CACHE_DISABLED.code
     return error
   }
 }

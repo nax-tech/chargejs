@@ -1,4 +1,9 @@
 import bluebird from 'bluebird'
+import {
+  REDIS_CREATE_ERROR,
+  REDIS_DELETE_ERROR,
+  REDIS_READ_ERROR
+} from '../../errors'
 
 /**
  * A infra type module
@@ -35,8 +40,8 @@ class RedisStorage {
       return reply
     } catch (error) {
       this.logger.error({
-        event: 'create',
-        info: 'redis create error',
+        event: REDIS_CREATE_ERROR.code,
+        info: REDIS_CREATE_ERROR.message,
         meta: error
       })
       throw error
@@ -57,8 +62,8 @@ class RedisStorage {
       return JSON.parse(object)
     } catch (error) {
       this.logger.error({
-        event: 'create',
-        info: 'redis read error',
+        event: REDIS_READ_ERROR.code,
+        info: REDIS_READ_ERROR.message,
         meta: error
       })
       throw error
@@ -78,8 +83,8 @@ class RedisStorage {
       await this.redisClient.delAsync(key)
     } catch (error) {
       this.logger.error({
-        event: 'create',
-        info: 'redis delete error',
+        event: REDIS_DELETE_ERROR.code,
+        info: REDIS_DELETE_ERROR.message,
         meta: error
       })
       throw error

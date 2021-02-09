@@ -1,5 +1,6 @@
 import { get } from 'dot-get'
 import isEqual from 'lodash/isEqual'
+import { INVALID_FILTER } from '../../errors'
 
 /**
  * A infra type module
@@ -99,8 +100,8 @@ class RedisRepository {
       .find(key => isEqual(key, keys))
     if (!valid) {
       // Error for developers only, can only occur if the cacheKeys configuration is incorrect
-      const error = new Error(`Invalid filter. Configure cache keys to support provided filter fields: "${JSON.stringify(keys)}"`)
-      error.type = 'InvalidFilterError'
+      const error = new Error(`${INVALID_FILTER.message}: "${JSON.stringify(keys)}"`)
+      error.type = INVALID_FILTER.code
       throw error
     }
   }
