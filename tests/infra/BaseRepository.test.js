@@ -132,7 +132,7 @@ describe('BaseRepository', function () {
     it('should findOneById (rejectOnEmpty=true)', async function () {
       const res = await baseRepository.findOneById(obj.id)
       baseRepository.findOne.should.have.been.calledOnce
-      baseRepository.findOne.should.have.been.calledWith({ id: obj.id }, { rejectOnEmpty: true })
+      baseRepository.findOne.should.have.been.calledWith({ id: obj.id })
       expect(res).to.deep.equal(obj)
     })
 

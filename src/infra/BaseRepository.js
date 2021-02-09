@@ -81,11 +81,12 @@ class BaseRepository {
    * @param {string} id Entity uuid
    * @param {Object} [options] options
    * @param {boolean} [options.rejectOnEmpty=true] reject on empty
+   * @param {boolean} [options.useCache] use cache
    * @returns {Promise<Object>} entity
    * @throws {module:interface.standardError}
    */
-  async findOneById (id, { rejectOnEmpty = true } = {}) {
-    return this.findOne({ id }, { rejectOnEmpty })
+  async findOneById (id, options) {
+    return this.findOne({ id }, options)
   }
 
   /**
