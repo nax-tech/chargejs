@@ -1,0 +1,7 @@
+{
+    "info": { },
+    "errors": {
+        "notFoundError": "NotFoundError",
+        "validationError": "ValidationError"
+    }
+}

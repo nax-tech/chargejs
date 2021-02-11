@@ -1,7 +1,7 @@
 import EventEmitter from 'events'
-import { INVALID_OUTPUT } from './errors'
-import { CustomException } from './helpers'
-const define = Object.defineProperty
+import { INVALID_OUTPUT } from '../errors'
+import { CustomException } from '../helpers'
+
 /**
  * A application type module
  * @module app
@@ -18,7 +18,7 @@ export class Operation extends EventEmitter {
    * @returns {void}
    */
   static setOutputs (outputs) {
-    define(this.prototype, 'outputs', {
+    Object.defineProperty(this.prototype, 'outputs', {
       value: createOutputs(outputs)
     })
   }

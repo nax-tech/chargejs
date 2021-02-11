@@ -115,3 +115,21 @@ export const NOTIFICATION_PUSH_COPY = {
     }
   }
 }
+
+export const EVENTS = {
+  CREATE: 'create',
+  UPDATE: 'update',
+  DELETE: 'delete',
+  READ: 'read'
+}
+
+export const ERROR_TYPES = {
+  INVALID_PATCH_FIELDS: 'InvalidPatchAllowedFields',
+  CACHE_DISABLED: 'CacheDisabledError',
+  INVALID_FILTER: 'InvalidFilterError'
+}
+
+export const SEQUELIZE_ERRORS = {
+  VALIDATION: 'SequelizeValidationError',
+  NOT_FOUND: 'SequelizeEmptyResultError'
+}

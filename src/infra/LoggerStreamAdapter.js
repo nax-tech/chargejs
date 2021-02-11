@@ -1,11 +1,4 @@
-import fs from 'fs'
-import path from 'path'
 import winston from 'winston'
-
-/**
- * A infra type module
- * @module infra
- */
 
 /**
  * The winston transport object
@@ -53,7 +46,7 @@ const logFormat = winston.format.printf(
  * @returns {external:winston.transport} the winston transport object
  *
  */
-export const LoggerStreamAdapter = env => {
+const LoggerStreamAdapter = env => {
   let LoggerStreamAdapter
   if (process.env.NODE_ENV === 'development') {
     LoggerStreamAdapter = new winston.transports.Console({
@@ -64,42 +57,4 @@ export const LoggerStreamAdapter = env => {
   }
   return LoggerStreamAdapter
 }
-
-/**
- * Creates winston transport namespaced to environment
- * @memberof module:infra
- * @method
- * @returns {external:sequelize.loaded} the sequelize loaded model object
- *
- */
-export const ModelLoader = () => {
-  return {
-    load ({ sequelize, baseFolder, indexFile = 'index.js' }) {
-      const loaded = {}
-
-      fs.readdirSync(baseFolder)
-        .filter(file => {
-          return (
-            file.indexOf('.') !== 0 &&
-            file !== indexFile &&
-            file.slice(-3) === '.js'
-          )
-        })
-        .forEach(file => {
-          const model = sequelize.import(path.join(baseFolder, file))
-          // const modelName = file.split('.')[0];
-          loaded[model.name] = model
-        })
-
-      Object.keys(loaded).forEach(modelName => {
-        if (loaded[modelName].associate) {
-          loaded[modelName].associate(loaded)
-        }
-      })
-
-      loaded.database = sequelize
-
-      return loaded
-    }
-  }
-}
+export default LoggerStreamAdapter
