@@ -136,6 +136,7 @@ class BaseRepository {
    */
   async findAll (where, options = {}) {
     const results = await this.model.findAll({
+      order: [['createdAt', 'DESC']],
       ...options,
       where,
       include: this.include,
@@ -165,6 +166,7 @@ class BaseRepository {
       pageSize
     )
     const { rows, count } = await this.model.findAndCountAll({
+      order: [['createdAt', 'DESC']],
       ...options,
       limit,
       offset,
