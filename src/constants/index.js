@@ -54,7 +54,8 @@ export const TYPES = {
 
 export const KIND = {
   PUSH: 'push',
-  EMAIL: 'email'
+  EMAIL: 'email',
+  SMS: 'sms'
 }
 
 export const NOTIFICATION_PUSH_COPY = {
