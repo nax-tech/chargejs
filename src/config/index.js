@@ -177,7 +177,8 @@ export const logging = (env, app) => {
  */
 export const NOTIFICATION_KIND = {
   push: KIND.PUSH,
-  email: KIND.EMAIL
+  email: KIND.EMAIL,
+  sms: KIND.SMS
 }
 /**
  * The source of notifications.
@@ -384,6 +385,12 @@ export const createNotifications = (settingsId) => {
       kind: NOTIFICATION_KIND.push,
       sourceType: NOTIFICATION_SOURCE_TYPES.cards,
       type: NOTIFICATION_TYPES.declined
+    },
+    {
+      settingsId,
+      kind: NOTIFICATION_KIND.sms,
+      sourceType: NOTIFICATION_SOURCE_TYPES.cards,
+      type: NOTIFICATION_TYPES.verification
     }
   ]
 }
