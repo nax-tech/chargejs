@@ -2,6 +2,7 @@ export const ALLOWED_ENVIRONMENTS = [
   'development',
   'dev',
   'stage',
+  'production',
   'prod',
   'test'
 ]
