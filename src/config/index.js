@@ -64,6 +64,7 @@ export const certs = (env = undefined) => {
   if (!ALLOWED_ENVIRONMENTS.includes(env)) {
     throw new CustomException(INVALID_ENV.message, INVALID_ENV.code)
   }
+  if (env === 'production') env = 'prod'
   return {
     ca: fs.readFileSync(CERTS.PREFIX_CA + env + CERTS.SUFFIX).toString(),
     cert: fs.readFileSync(CERTS.PREFIX_CERT + env + CERTS.SUFFIX).toString()
