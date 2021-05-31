@@ -392,6 +392,12 @@ export const createNotifications = (settingsId) => {
       kind: NOTIFICATION_KIND.sms,
       sourceType: NOTIFICATION_SOURCE_TYPES.cards,
       type: NOTIFICATION_TYPES.verification
+    },
+    {
+      settingsId,
+      kind: NOTIFICATION_KIND.push,
+      sourceType: NOTIFICATION_SOURCE_TYPES.transactions,
+      type: NOTIFICATION_TYPES.new
     }
   ]
 }
