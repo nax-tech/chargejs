@@ -13,13 +13,6 @@ jobs:
       - run:
           name: update-npm
           command: 'sudo npm install -g npm@latest'
-      - run:
-          name: Setup Code Climate test-reporter
-          command: |
-            # download test reporter as a static binary
-              curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-              chmod +x ./cc-test-reporter
-              ./cc-test-reporter before-build
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "package.json" }}
@@ -38,13 +31,6 @@ jobs:
       - run:
           name: Test
           command: npm run test:report
-      - run:
-          name: Send coverage report to Code Climate
-          command:
-              # nyc report requires that nyc has already been run,
-              # which creates the .nyc_output folder containing necessary data
-              ./cc-test-reporter after-build -t lcov
-          when: always
       - persist_to_workspace:
           root: ~/chargejs
           paths: .
