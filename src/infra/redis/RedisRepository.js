@@ -125,7 +125,7 @@ class RedisRepository {
       await Promise.all(
         relations.map(({ id, entityName }) => this._deleteObject(this._buildIdKey(entityName, id)))
       )
-      return this._deleteObject(relationsKey)
+      return this._clearList(relationsKey)
     }
   }
 
@@ -142,7 +142,7 @@ class RedisRepository {
   async _pushToList (key, object) {
     await this.redisStorage.listPush(key, object)
     this.transactionProvider.addRedisRollback(
-      async () => this.redisStorage.listPop(key)
+      async () => this.redisStorage.listRemove(key, object)
     )
   }
 
@@ -150,6 +150,13 @@ class RedisRepository {
     await this.redisStorage.saveObject(key, entry)
     this.transactionProvider.addRedisRollback(
       async () => this.redisStorage.deleteObject(key)
+    )
+  }
+
+  async _clearList (key) {
+    const values = await this.redisStorage.deleteObject(key)
+    this.transactionProvider.addRedisRollback(
+      async () => this.redisStorage.pushToList(key, ...values)
     )
   }
 

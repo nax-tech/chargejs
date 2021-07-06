@@ -96,15 +96,15 @@ class RedisStorage {
    * push items to the list in Redis. values will be JSON.stringify(value)
    *
    * @param {string} key the key of the object
-   * @param {Object} object the value
+   * @param {Array<Object>} objects the values
    * @returns {Promise<string>}
    * @throws {module:interface.standardError}
    * @memberof module:repository.RedisRepository
    */
-  async listPush (key, object) {
+  async listPush (key, ...objects) {
     try {
-      const redisObject = JSON.stringify(object)
-      const reply = await this.redisClient.rpushAsync(key, redisObject)
+      const redisObjects = objects.map(JSON.stringify)
+      const reply = await this.redisClient.lpushAsync(key, ...redisObjects)
       return reply
     } catch (error) {
       this.logger.error({
@@ -120,14 +120,14 @@ class RedisStorage {
    * pop items from the list in Redis. values will be JSON.stringify(value)
    *
    * @param {string} key the key of the object
-   * @returns {Promise<Object>}
+   * @returns {Promise}
    * @throws {module:interface.standardError}
    * @memberof module:repository.RedisRepository
    */
-  async listPop (key) {
+  async listRemove (key, object) {
     try {
-      const reply = await this.redisClient.rpopAsync(key)
-      return reply && JSON.parse(reply)
+      const redisObject = JSON.stringify(object)
+      await this.redisClient.lremAsync(key, 1, redisObject)
     } catch (error) {
       this.logger.error({
         event: REDIS_CREATE_ERROR.code,
