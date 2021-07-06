@@ -65,7 +65,7 @@ class BaseRepository {
     this.cacheDisabled = cacheDisabled
 
     if (!cacheDisabled) {
-      this.redisRepository.init(modelName)
+      this.redisRepository.init(modelName, include)
     }
   }
 
