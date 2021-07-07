@@ -13,8 +13,8 @@ class RedisRepository {
     this.transactionProvider = transactionProvider
   }
 
-  init (entityName, include) {
-    this.entityName = entityName
+  init (modelName, include) {
+    this.modelName = modelName
     this.cacheKeys = []
     this.include = include
   }
@@ -48,7 +48,7 @@ class RedisRepository {
   }
 
   async create (entity) {
-    const idKey = this._buildIdKey(this.entityName, entity.id)
+    const idKey = this._buildIdKey(this.modelName, entity.id)
     await this._saveObject(idKey, entity)
     const cacheKeys = this._getEntityCacheKeys(entity)
     await Promise.all(cacheKeys.map(
@@ -64,7 +64,7 @@ class RedisRepository {
     }
     const entity = await this.findOne(where)
     if (entity) {
-      const key = this._buildIdKey(this.entityName, entity.id)
+      const key = this._buildIdKey(this.modelName, entity.id)
       await this._deleteObject(key)
       await this._clearRelated(entity)
       const cacheKeys = this._getEntityCacheKeys(entity)
@@ -76,7 +76,7 @@ class RedisRepository {
   }
 
   async _deleteById (id) {
-    const key = this._buildIdKey(this.entityName, id)
+    const key = this._buildIdKey(this.modelName, id)
     const entity = await this._deleteObject(key)
     await this._clearRelated(entity)
     if (entity) {
@@ -89,12 +89,12 @@ class RedisRepository {
   }
 
   _getRelated (entity, include) {
-    return include.reduce((result, { entityName, as, include }) => {
+    return include.reduce((result, { modelName, as, include }) => {
       const related = entity[as]
       if (related) {
         const relatedArray = Array.isArray(related) ? related : [related]
         relatedArray.forEach(object => {
-          result.push({ entityName, id: object.id })
+          result.push({ modelName, id: object.id })
           if (include) {
             result.push(...this._getRelated(object, include))
           }
@@ -108,11 +108,11 @@ class RedisRepository {
     if (this.include && this.include.length) {
       const entityInfo = {
         id: entity.id,
-        entityName: this.entityName
+        modelName: this.modelName
       }
       return Promise.all(
         this._getRelated(entity, this.include)
-          .map(({ entityName, id }) => this._buildRelationsKey(entityName, id))
+          .map(({ modelName, id }) => this._buildRelationsKey(modelName, id))
           .map(key => this._pushToList(key, entityInfo))
       )
     }
@@ -123,14 +123,14 @@ class RedisRepository {
     const relations = await this.redisStorage.getList(relationsKey)
     if (relations.length) {
       await Promise.all(
-        relations.map(({ id, entityName }) => this._deleteObject(this._buildIdKey(entityName, id)))
+        relations.map(({ id, modelName }) => this._deleteObject(this._buildIdKey(modelName, id)))
       )
       return this._clearList(relationsKey)
     }
   }
 
   async _getById (id) {
-    const key = this._buildIdKey(this.entityName, id)
+    const key = this._buildIdKey(this.modelName, id)
     return this.redisStorage.getObject(key)
   }
 
@@ -180,12 +180,12 @@ class RedisRepository {
     }
   }
 
-  _buildRelationsKey (entityName, id) {
-    return `relations:::${entityName}:${id}`
+  _buildRelationsKey (modelName, id) {
+    return `relation::${modelName}:${id}`
   }
 
-  _buildIdKey (entityName, id) {
-    return `${entityName}:${id}`
+  _buildIdKey (modelName, id) {
+    return `${modelName}:${id}`
   }
 
   _normalizeFilter (filter) {
@@ -209,7 +209,7 @@ class RedisRepository {
     const filterString = keys.map(
       key => `${key}:${normalizedFilter[key]}`
     ).join(';')
-    return `${this.entityName}:${filterString}`
+    return `${this.modelName}:${filterString}`
   }
 
   _getEntityCacheKeys (entity) {
