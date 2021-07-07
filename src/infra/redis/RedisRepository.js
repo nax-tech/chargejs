@@ -89,8 +89,8 @@ class RedisRepository {
   }
 
   _getRelated (entity, include) {
-    return include.reduce((result, { entityName, include }) => {
-      const related = entity[entityName]
+    return include.reduce((result, { entityName, as, include }) => {
+      const related = entity[as]
       if (related) {
         const relatedArray = Array.isArray(related) ? related : [related]
         relatedArray.forEach(object => {

@@ -81,7 +81,12 @@ class RedisStorage {
   async deleteObject (key) {
     try {
       const object = await this.redisClient.getdelAsync(key)
-      return object && JSON.stringify(object)
+      if (object) {
+        if (Array.isArray(object)) {
+          return object.map(JSON.stringify)
+        }
+        return JSON.stringify(object)
+      }
     } catch (error) {
       this.logger.error({
         event: REDIS_DELETE_ERROR.code,
