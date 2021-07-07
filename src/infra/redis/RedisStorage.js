@@ -74,7 +74,7 @@ class RedisStorage {
    * deletes key-value in Redis.
    *
    * @param {string} key the key of the object
-   * @returns {Promise<Object>}
+   * @returns {Promise<Object|Array<Object>>}
    * @throws {module:interface.standardError}
    * @memberof module:repository.RedisRepository
    */
