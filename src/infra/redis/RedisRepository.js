@@ -11,80 +11,107 @@ class RedisRepository {
   constructor ({ redisStorage, transactionProvider }) {
     this.redisStorage = redisStorage
     this.transactionProvider = transactionProvider
+    this.entities = {}
   }
 
   init (modelName, include) {
-    this.modelName = modelName
-    this.cacheKeys = []
-    this.include = include
+    this.entities[modelName] = {
+      modelName,
+      include,
+      cacheKeys: []
+    }
   }
 
-  setCacheKeys (keys) {
-    this.cacheKeys = keys
+  setCacheKeys (modelName, keys) {
+    this.entities[modelName].cacheKeys = keys
       .map(key => Array.isArray(key) ? key.sort() : [key])
       .filter(key => !isEqual(key, ['id']))
   }
 
-  async findOneOrCreate (where, getEntity) {
-    let entity = await this.findOne(where)
+  async findOneOrCreate (modelName, where, getEntity) {
+    let entity = await this.findOne(modelName, where)
     if (entity) {
       return entity
     }
     entity = await getEntity()
     if (entity) {
-      return this.create(entity)
+      return this.create(modelName, entity)
     }
   }
 
-  async findOne (where) {
+  async findOne (modelName, where) {
     if (isEqual(Object.keys(where), ['id'])) {
-      return this._getById(where.id)
+      return this._getById(modelName, where.id)
     }
-    this._validateFilter(where)
-    const id = await this._getByFilter(where)
+    this._validateFilter(modelName, where)
+    const id = await this._getByFilter(modelName, where)
     if (id) {
-      return this._getById(id)
+      return this._getById(modelName, id)
     }
   }
 
-  async create (entity) {
-    const idKey = this._buildIdKey(this.modelName, entity.id)
+  async create (modelName, entity) {
+    const idKey = this._buildIdKey(modelName, entity.id)
     await this._saveObject(idKey, entity)
-    const cacheKeys = this._getEntityCacheKeys(entity)
+    const cacheKeys = this._getEntityCacheKeys(modelName, entity)
     await Promise.all(cacheKeys.map(
-      async (key) => this._saveObject(key, entity.id)
+      key => this._saveObject(key, entity.id)
     ))
-    await this._storeRelated(entity)
+    await this._storeRelated(modelName, entity)
     return entity
   }
 
-  async delete (where) {
+  async delete (modelName, entity) {
+    const object = await this._delete(modelName, entity)
+    return this._clearRelated(modelName, object)
+  }
+
+  async deleteByFilter (modelName, where) {
     if (isEqual(Object.keys(where), ['id'])) {
-      return this._deleteById(where.id)
+      const entity = await this._deleteById(modelName, where.id)
+      return this._clearRelated(modelName, entity)
     }
-    const entity = await this.findOne(where)
+    const entity = await this.findOne(modelName, where)
     if (entity) {
-      const key = this._buildIdKey(this.modelName, entity.id)
-      await this._deleteObject(key)
-      await this._clearRelated(entity)
-      const cacheKeys = this._getEntityCacheKeys(entity)
-      await Promise.all(cacheKeys.map(
-        async (key) => this._deleteObject(key)
-      ))
-      return entity
+      return this.delete(modelName, entity)
     }
   }
 
-  async _deleteById (id) {
-    const key = this._buildIdKey(this.modelName, id)
-    const entity = await this._deleteObject(key)
-    await this._clearRelated(entity)
-    if (entity) {
-      const cacheKeys = this._getEntityCacheKeys(entity)
-      await Promise.all(cacheKeys.map(
-        async (key) => this._deleteObject(key)
-      ))
-      return entity
+  async _delete (modelName, entity) {
+    const key = this._buildIdKey(modelName, entity.id)
+    const object = await this._deleteObject(key) || entity
+    await this._clearByCacheKeys(modelName, object)
+    return object
+  }
+
+  async _deleteById (modelName, id) {
+    const key = this._buildIdKey(modelName, id)
+    const object = await this._deleteObject(key)
+    if (object) {
+      await this._clearByCacheKeys(modelName, object)
+      return object
+    }
+  }
+
+  _clearByCacheKeys (modelName, entity) {
+    const cacheKeys = this._getEntityCacheKeys(modelName, entity)
+    return Promise.all(cacheKeys.map(
+      key => this._deleteObject(key)
+    ))
+  }
+
+  async _storeRelated (modelName, entity) {
+    const { include } = this.entities[modelName]
+    if (include && include.length) {
+      const entityInfo = {
+        id: entity.id,
+        modelName
+      }
+      return Promise.all(
+        this._getRelated(entity, include)
+          .map(({ modelName, id }) => this._buildRelationsKey(modelName, id))
+          .map(key => this._pushToList(key, entityInfo))
+      )
     }
   }
 
@@ -104,38 +131,24 @@ class RedisRepository {
     }, [])
   }
 
-  async _storeRelated (entity) {
-    if (this.include && this.include.length) {
-      const entityInfo = {
-        id: entity.id,
-        modelName: this.modelName
-      }
-      return Promise.all(
-        this._getRelated(entity, this.include)
-          .map(({ modelName, id }) => this._buildRelationsKey(modelName, id))
-          .map(key => this._pushToList(key, entityInfo))
-      )
-    }
-  }
-
-  async _clearRelated (entity) {
-    const relationsKey = this._buildRelationsKey(this.modelName, entity.id)
+  async _clearRelated (modelName, entity) {
+    const relationsKey = this._buildRelationsKey(modelName, entity.id)
     const relations = await this.redisStorage.getList(relationsKey)
     if (relations.length) {
       await Promise.all(
-        relations.map(({ id, modelName }) => this._deleteObject(this._buildIdKey(modelName, id)))
+        relations.map(({ id, modelName }) => this._deleteById(modelName, id))
       )
       return this._clearList(relationsKey)
     }
   }
 
-  async _getById (id) {
-    const key = this._buildIdKey(this.modelName, id)
+  async _getById (modelName, id) {
+    const key = this._buildIdKey(modelName, id)
     return this.redisStorage.getObject(key)
   }
 
-  async _getByFilter (filter) {
-    const key = this._buildFilterKey(filter)
+  async _getByFilter (modelName, filter) {
+    const key = this._buildFilterKey(modelName, filter)
     return this.redisStorage.getObject(key)
   }
 
@@ -149,28 +162,28 @@ class RedisRepository {
   async _saveObject (key, entry) {
     await this.redisStorage.saveObject(key, entry)
     this.transactionProvider.addRedisRollback(
-      async () => this.redisStorage.deleteObject(key)
+      () => this.redisStorage.deleteObject(key)
     )
   }
 
   async _clearList (key) {
     const values = await this.redisStorage.deleteObject(key)
     this.transactionProvider.addRedisRollback(
-      async () => this.redisStorage.pushToList(key, ...values)
+      () => this.redisStorage.pushToList(key, ...values)
     )
   }
 
   async _deleteObject (key) {
     const entry = await this.redisStorage.deleteObject(key)
     this.transactionProvider.addRedisRollback(
-      async () => this.redisStorage.saveObject(key, entry)
+      () => this.redisStorage.saveObject(key, entry)
     )
   }
 
-  _validateFilter (filter) {
+  _validateFilter (modelName, filter) {
     const normalizedFilter = this._normalizeFilter(filter)
     const keys = Object.keys(normalizedFilter).sort()
-    const valid = !!this.cacheKeys
+    const valid = !!this.entities[modelName].cacheKeys
       .find(key => isEqual(key, keys))
     if (!valid) {
       // Error for developers only, can only occur if the cacheKeys configuration is incorrect
@@ -203,22 +216,22 @@ class RedisRepository {
     }, {})
   }
 
-  _buildFilterKey (filter) {
+  _buildFilterKey (modelName, filter) {
     const normalizedFilter = this._normalizeFilter(filter)
     const keys = Object.keys(normalizedFilter).sort()
     const filterString = keys.map(
       key => `${key}:${normalizedFilter[key]}`
     ).join(';')
-    return `${this.modelName}:${filterString}`
+    return `${modelName}:${filterString}`
   }
 
-  _getEntityCacheKeys (entity) {
-    return this.cacheKeys.map(key => {
+  _getEntityCacheKeys (modelName, entity) {
+    return this.entities[modelName].cacheKeys.map(key => {
       const filter = key.reduce((res, field) => ({
         ...res,
         [field]: get(entity, field)
       }), {})
-      return this._buildFilterKey(filter)
+      return this._buildFilterKey(modelName, filter)
     })
   }
 }

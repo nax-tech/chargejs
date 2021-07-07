@@ -63,10 +63,7 @@ class BaseRepository {
     this.patchAllowedFields = patchAllowedFields
     this.include = include
     this.cacheDisabled = cacheDisabled
-
-    if (!cacheDisabled) {
-      this.redisRepository.init(modelName, include)
-    }
+    this.redisRepository.init(modelName, include)
   }
 
   /**
@@ -79,7 +76,7 @@ class BaseRepository {
     if (this.cacheDisabled) {
       throw this._getCacheDisabledError()
     }
-    this.redisRepository.setCacheKeys(keys)
+    this.redisRepository.setCacheKeys(this.modelName, keys)
   }
 
   /**
@@ -112,7 +109,7 @@ class BaseRepository {
       if (this.cacheDisabled) {
         throw this._getCacheDisabledError()
       }
-      result = await this.redisRepository.findOneOrCreate(where,
+      result = await this.redisRepository.findOneOrCreate(this.modelName, where,
         async () => this._dbFindOne(where)
       )
     } else {
@@ -234,8 +231,11 @@ class BaseRepository {
       if (!result) {
         throw this._getNotFoundError()
       }
-      return this.mapper.toEntity(result.toJSON())
+      const json = result.toJSON()
+      await this.redisRepository.delete(this.modelName, json)
+      return this.mapper.toEntity(json)
     } catch (error) {
+      await this.redisRepository.deleteByFilter(this.modelName, where)
       switch (error.name) {
         case SEQUELIZE_VALIDATION_ERROR.code:
           throw this._getValidationError(error.errors)
@@ -243,10 +243,6 @@ class BaseRepository {
           throw this._getNotFoundError()
         default:
           throw error
-      }
-    } finally {
-      if (!this.cacheDisabled) {
-        await this.redisRepository.delete(where)
       }
     }
   }
@@ -279,11 +275,12 @@ class BaseRepository {
       if (!result) {
         throw this._getNotFoundError()
       }
-      return this.mapper.toEntity(result.toJSON())
-    } finally {
-      if (!this.cacheDisabled) {
-        await this.redisRepository.delete(where)
-      }
+      const json = result.toJSON()
+      await this.redisRepository.delete(this.modelName, json)
+      return this.mapper.toEntity(json)
+    } catch (error) {
+      await this.redisRepository.deleteByFilter(this.modelName, where)
+      throw error
     }
   }
 
@@ -307,7 +304,7 @@ class BaseRepository {
     const hasRelatedEntityFilter = Object.keys(where)
       .find(key => key.startsWith('$'))
     if (hasRelatedEntityFilter) {
-      const cachedEntity = await this.redisRepository.findOne(where)
+      const cachedEntity = await this.redisRepository.findOne(this.modelName, where)
       const entity = cachedEntity || await this._dbFindOne(where)
       if (!entity) {
         throw this._getNotFoundError()
