@@ -63,13 +63,14 @@ class RedisRepository {
 
   async delete (modelName, entity) {
     const object = await this._delete(modelName, entity)
-    return this._clearRelated(modelName, object)
+    return this._clearRelated(modelName, object.id)
   }
 
   async deleteByFilter (modelName, where) {
     if (isEqual(Object.keys(where), ['id'])) {
-      const entity = await this._deleteById(modelName, where.id)
-      return this._clearRelated(modelName, entity)
+      const { id } = where
+      const entity = await this._deleteById(modelName, id)
+      return this._clearRelated(modelName, entity.id)
     }
     const entity = await this.findOne(modelName, where)
     if (entity) {
@@ -131,12 +132,12 @@ class RedisRepository {
     }, [])
   }
 
-  async _clearRelated (modelName, entity) {
-    const relationsKey = this._buildRelationsKey(modelName, entity.id)
+  async _clearRelated (modelName, id) {
+    const relationsKey = this._buildRelationsKey(modelName, id)
     const relations = await this.redisStorage.getList(relationsKey)
     if (relations.length) {
       await Promise.all(
-        relations.map(({ id, modelName }) => this._deleteById(modelName, id))
+        relations.map(({ modelName, id }) => this._deleteById(modelName, id))
       )
       return this._clearList(relationsKey)
     }
