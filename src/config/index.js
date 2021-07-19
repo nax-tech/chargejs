@@ -195,7 +195,8 @@ export const NOTIFICATION_SOURCE_TYPES = {
   pin: SOURCE_TYPES.PIN,
   support: SOURCE_TYPES.SUPPORT,
   transactions: SOURCE_TYPES.TRANSACTIONS,
-  cards: SOURCE_TYPES.CARDS
+  cards: SOURCE_TYPES.CARDS,
+  device: SOURCE_TYPES.DEVICE
 }
 /**
  * The type of notifications.
