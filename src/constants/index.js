@@ -38,7 +38,8 @@ export const SOURCE_TYPES = {
   PIN: 'pin',
   SUPPORT: 'support',
   TRANSACTIONS: 'transactions',
-  CARDS: 'cards'
+  CARDS: 'cards',
+  DEVICE: 'device'
 }
 
 export const TYPES = {
