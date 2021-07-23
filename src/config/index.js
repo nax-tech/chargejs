@@ -307,6 +307,12 @@ export const createNotifications = (settingsId) => {
     {
       settingsId,
       kind: NOTIFICATION_KIND.email,
+      sourceType: NOTIFICATION_SOURCE_TYPES.device,
+      type: NOTIFICATION_TYPES.verification
+    },
+    {
+      settingsId,
+      kind: NOTIFICATION_KIND.email,
       sourceType: NOTIFICATION_SOURCE_TYPES.password,
       type: NOTIFICATION_TYPES.verification
     },
