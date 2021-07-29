@@ -101,7 +101,7 @@ class RedisRepository {
     ))
   }
 
-  async _storeRelated (modelName, entity) {
+  _storeRelated (modelName, entity) {
     const { include } = this.entities[modelName]
     if (include && include.length) {
       const entityInfo = {
@@ -139,7 +139,7 @@ class RedisRepository {
       await Promise.all(
         relations.map(({ modelName, id }) => this._deleteById(modelName, id))
       )
-      return this._clearList(relationsKey)
+      return this._clearList(relationsKey, relations)
     }
   }
 
@@ -148,9 +148,11 @@ class RedisRepository {
     return this.redisStorage.getObject(key)
   }
 
-  async _getByFilter (modelName, filter) {
+  _getByFilter (modelName, filter) {
     const key = this._buildFilterKey(modelName, filter)
-    return this.redisStorage.getObject(key)
+    if (key) {
+      return this.redisStorage.getObject(key)
+    }
   }
 
   async _pushToList (key, object) {
@@ -167,8 +169,8 @@ class RedisRepository {
     )
   }
 
-  async _clearList (key) {
-    const values = await this.redisStorage.deleteObject(key)
+  async _clearList (key, values) {
+    await this.redisStorage.listClear(key)
     this.transactionProvider.addRedisRollback(
       () => this.redisStorage.pushToList(key, ...values)
     )
@@ -218,12 +220,18 @@ class RedisRepository {
   }
 
   _buildFilterKey (modelName, filter) {
-    const normalizedFilter = this._normalizeFilter(filter)
-    const keys = Object.keys(normalizedFilter).sort()
-    const filterString = keys.map(
-      key => `${key}:${normalizedFilter[key]}`
-    ).join(';')
-    return `${modelName}:${filterString}`
+    if (
+      filter &&
+        Object.keys(filter).length &&
+        !Object.values(filter).includes(undefined)
+    ) {
+      const normalizedFilter = this._normalizeFilter(filter)
+      const keys = Object.keys(normalizedFilter).sort()
+      const filterString = keys.map(
+        key => `${key}:${normalizedFilter[key]}`
+      ).join(';')
+      return `${modelName}:${filterString}`
+    }
   }
 
   _getEntityCacheKeys (modelName, entity) {
@@ -233,7 +241,7 @@ class RedisRepository {
         [field]: get(entity, field)
       }), {})
       return this._buildFilterKey(modelName, filter)
-    })
+    }).filter(Boolean)
   }
 }
 export default RedisRepository
