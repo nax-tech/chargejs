@@ -181,6 +181,7 @@ class RedisRepository {
     this.transactionProvider.addRedisRollback(
       () => this.redisStorage.saveObject(key, entry)
     )
+    return entry
   }
 
   _validateFilter (modelName, filter) {
