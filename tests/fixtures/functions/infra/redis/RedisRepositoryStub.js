@@ -19,5 +19,8 @@ export default {
   },
   deleteByFilter () {
     return true
+  },
+  clearRelated () {
+    return true
   }
 }

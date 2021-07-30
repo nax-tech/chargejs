@@ -71,46 +71,6 @@ describe('BaseRepository', function () {
     })
   })
 
-  describe('setCacheKeys', function () {
-    beforeEach(() => {
-      sinon.spy(RedisRepositoryStub, 'setCacheKeys')
-    })
-
-    afterEach(() => {
-      RedisRepositoryStub.setCacheKeys.restore()
-    })
-
-    it('should setCacheKeys', async function () {
-      baseRepository.init({
-        modelName: 'modelName',
-        model: SequelizeModelStub,
-        mapper: EntityMapperStub
-      })
-      const cacheKeys = ['key1', 'key2']
-      baseRepository.setCacheKeys(cacheKeys)
-
-      RedisRepositoryStub.setCacheKeys.should.have.been.calledOnce
-      RedisRepositoryStub.setCacheKeys.should.have.been.calledWith('modelName', cacheKeys)
-    })
-    it('should throw on setCacheKeys if cache is disabled', async function () {
-      baseRepository.init({
-        modelName: 'modelName',
-        model: SequelizeModelStub,
-        mapper: EntityMapperStub,
-        cacheDisabled: true
-      })
-      let error
-      try {
-        const cacheKeys = ['key1', 'key2']
-        baseRepository.setCacheKeys(cacheKeys)
-      } catch (e) {
-        error = e
-      }
-      RedisRepositoryStub.setCacheKeys.should.have.not.been.called
-      expect(error.type).to.equal('CacheDisabledError')
-    })
-  })
-
   describe('findOneById', function () {
     const obj = {
       id: faker.random.uuid(),
@@ -164,8 +124,7 @@ describe('BaseRepository', function () {
       })
 
       const res = await baseRepository.findOne(where, true, true)
-      expect(RedisRepositoryStub.findOneOrCreate.getCall(0).args[0]).to.equal('modelName')
-      expect(RedisRepositoryStub.findOneOrCreate.getCall(0).args[1]).to.deep.equal(where)
+      expect(RedisRepositoryStub.findOneOrCreate.getCall(0).args[0]).to.deep.equal(where)
       baseRepository._dbFindOne.should.have.not.been.called
       EntityMapperStub.toEntity.should.have.been.calledOnce
       EntityMapperStub.toEntity.should.have.been.calledWith(obj)
@@ -217,8 +176,7 @@ describe('BaseRepository', function () {
       } catch (e) {
         error = e
       }
-      expect(RedisRepositoryStub.findOneOrCreate.getCall(0).args[0]).to.deep.equal('modelName')
-      expect(RedisRepositoryStub.findOneOrCreate.getCall(0).args[1]).to.deep.equal(where)
+      expect(RedisRepositoryStub.findOneOrCreate.getCall(0).args[0]).to.deep.equal(where)
       baseRepository._dbFindOne.should.have.not.been.called
       EntityMapperStub.toEntity.should.have.not.been.called
       baseRepository._getNotFoundError.should.have.been.calledOnce
@@ -243,8 +201,7 @@ describe('BaseRepository', function () {
       })
 
       const res = await baseRepository.findOne(where, { rejectOnEmpty: false, useCache: true })
-      expect(RedisRepositoryStub.findOneOrCreate.getCall(0).args[0]).to.deep.equal('modelName')
-      expect(RedisRepositoryStub.findOneOrCreate.getCall(0).args[1]).to.deep.equal(where)
+      expect(RedisRepositoryStub.findOneOrCreate.getCall(0).args[0]).to.deep.equal(where)
       baseRepository._dbFindOne.should.have.not.been.called
       EntityMapperStub.toEntity.should.have.not.been.called
       baseRepository._getNotFoundError.should.have.not.been.called
@@ -546,8 +503,7 @@ describe('BaseRepository', function () {
       EntityMapperStub.toEntity.should.have.been.calledOnce
       EntityMapperStub.toEntity.should.have.been.calledWith(obj)
       RedisRepositoryStub.delete.should.have.been.calledOnce
-      expect(RedisRepositoryStub.delete.getCall(0).args[0]).to.deep.equal('modelName')
-      expect(RedisRepositoryStub.delete.getCall(0).args[1]).to.deep.equal(obj)
+      expect(RedisRepositoryStub.delete.getCall(0).args[0]).to.deep.equal(obj)
       expect(res).to.deep.equal(domainEntity)
 
       baseRepository._filterPatchFields.restore()
@@ -624,7 +580,7 @@ describe('BaseRepository', function () {
       baseRepository._getNotFoundError.should.have.been.calledOnce
       EntityMapperStub.toEntity.should.have.not.been.called
       RedisRepositoryStub.deleteByFilter.should.have.been.calledOnce
-      RedisRepositoryStub.deleteByFilter.should.have.been.calledWith('modelName', where)
+      RedisRepositoryStub.deleteByFilter.should.have.been.calledWith(where)
       expect(error.message).to.equal('NotFoundError')
 
       baseRepository._filterPatchFields.restore()
@@ -694,7 +650,7 @@ describe('BaseRepository', function () {
       EntityMapperStub.toEntity.should.have.been.calledOnce
       EntityMapperStub.toEntity.should.have.been.calledWith(obj)
       RedisRepositoryStub.delete.should.have.been.calledOnce
-      RedisRepositoryStub.delete.should.have.been.calledWith('modelName', obj)
+      RedisRepositoryStub.delete.should.have.been.calledWith(obj)
       expect(res).to.deep.equal(domainEntity)
 
       baseRepository._getPatchFilter.restore()
@@ -764,7 +720,7 @@ describe('BaseRepository', function () {
       baseRepository._getNotFoundError.should.have.been.calledOnce
       EntityMapperStub.toEntity.should.have.not.been.called
       RedisRepositoryStub.deleteByFilter.should.have.been.calledOnce
-      RedisRepositoryStub.deleteByFilter.should.have.been.calledWith('modelName', where)
+      RedisRepositoryStub.deleteByFilter.should.have.been.calledWith(where)
       expect(error.message).to.deep.equal('NotFoundError')
 
       baseRepository._getPatchFilter.restore()
@@ -870,7 +826,7 @@ describe('BaseRepository', function () {
       }
       const res = await baseRepository._getPatchFilter(filter)
       RedisRepositoryStub.findOne.should.have.been.calledOnce
-      RedisRepositoryStub.findOne.should.have.been.calledWith('modelName', filter)
+      RedisRepositoryStub.findOne.should.have.been.calledWith(filter)
       baseRepository._dbFindOne.should.have.not.been.called
       baseRepository._getNotFoundError.should.have.not.been.called
       expect(res).to.deep.equal({ id: obj.id })
@@ -892,7 +848,7 @@ describe('BaseRepository', function () {
       }
       const res = await baseRepository._getPatchFilter(filter)
       RedisRepositoryStub.findOne.should.have.been.calledOnce
-      RedisRepositoryStub.findOne.should.have.been.calledWith('modelName', filter)
+      RedisRepositoryStub.findOne.should.have.been.calledWith(filter)
       baseRepository._dbFindOne.should.have.been.calledOnce
       baseRepository._dbFindOne.should.have.been.calledWith(filter)
       baseRepository._getNotFoundError.should.have.not.been.called
@@ -922,7 +878,7 @@ describe('BaseRepository', function () {
       }
 
       RedisRepositoryStub.findOne.should.have.been.calledOnce
-      RedisRepositoryStub.findOne.should.have.been.calledWith('modelName', filter)
+      RedisRepositoryStub.findOne.should.have.been.calledWith(filter)
       baseRepository._dbFindOne.should.have.been.calledOnce
       baseRepository._dbFindOne.should.have.been.calledWith(filter)
       baseRepository._getNotFoundError.should.have.been.calledOnce

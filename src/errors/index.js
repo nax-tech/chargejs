@@ -39,12 +39,12 @@ export const INVALID_PATCH_FIELDS = {
 }
 
 export const CACHE_DISABLED = {
-  message: 'disableCache option was set to true, please provide provide disableCache: false option to use caching',
+  message: 'disableCache option was set to `true`, please provide provide disableCache: `false` option to use caching',
   code: ERROR_TYPES.CACHE_DISABLED
 }
 
 export const INVALID_FILTER = {
-  message: 'Invalid filter. Configure cache keys to support provided filter fields',
+  message: 'Invalid filter. Disable cache usage or configure model indexes to support provided filter fields',
   code: ERROR_TYPES.INVALID_FILTER
 }
 
