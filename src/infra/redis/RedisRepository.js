@@ -16,7 +16,7 @@ class RedisRepository {
   init (modelName, indexes, include) {
     this.modelName = modelName
     this.include = include
-    this.indexes = this._normalizeIndexes(indexes || [])
+    this.indexes = this._normalizeIndexes(indexes)
   }
 
   async findOneOrCreate (where, getEntity) {

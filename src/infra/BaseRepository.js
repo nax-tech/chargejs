@@ -63,7 +63,9 @@ class BaseRepository {
     this.patchAllowedFields = patchAllowedFields
     this.include = include
     this.cacheDisabled = cacheDisabled
-    this.redisRepository.init(modelName, model._indexes, include)
+
+    const indexes = !cacheDisabled ? model._indexes : []
+    this.redisRepository.init(modelName, indexes, include)
   }
 
   /**
