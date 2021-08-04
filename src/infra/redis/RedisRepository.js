@@ -21,7 +21,6 @@ class RedisRepository {
       throw error
     }
     this._initialized = true
-
     this.modelName = modelName
     this.include = include
     this.indexes = this._normalizeIndexes(indexes)
@@ -30,19 +29,16 @@ class RedisRepository {
   async findOneOrCreate (where, getObject) {
     let object = await this.findOne(where)
     if (object) {
-      console.log('\n\nFROM CACHE:', `${object.object}:${object.id}\n\n`)
       return object
     }
     object = await getObject()
     if (object) {
-      console.log('\n\nFROM DATABASE:', `${object.object}:${object.id}\n\n`)
       return this.create(object)
     }
   }
 
   async findOne (where) {
     this._validateFilter(where)
-
     const keys = Object.keys(where)
     if (keys.includes('id')) {
       const object = await this._getById(this.modelName, where.id)
@@ -205,7 +201,6 @@ class RedisRepository {
 
   _validateFilter (filter) {
     const normalizedFilter = this._normalizeFilter(filter)
-
     const entries = Object.entries(normalizedFilter)
     const allowedTypes = ['boolean', 'string', 'number']
     const invalidValues = entries.filter(([, val]) => !allowedTypes.includes(typeof val))
