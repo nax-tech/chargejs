@@ -245,7 +245,7 @@ class RedisRepository {
         ...res,
         [field]: get(object, field)
       }), {})
-      return this._buildFiltагаerKey(modelName, filter)
+      return this._buildFilterKey(modelName, filter)
     }).filter(Boolean)
   }
 }
