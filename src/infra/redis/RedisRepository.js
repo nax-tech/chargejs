@@ -30,10 +30,12 @@ class RedisRepository {
   async findOneOrCreate (where, getObject) {
     let object = await this.findOne(where)
     if (object) {
+      console.log('\n\nFROM CACHE:', `${object.object}:${object.id}\n\n`)
       return object
     }
     object = await getObject()
     if (object) {
+      console.log('\n\nFROM DATABASE:', `${object.object}:${object.id}\n\n`)
       return this.create(object)
     }
   }
@@ -44,7 +46,10 @@ class RedisRepository {
     const keys = Object.keys(where)
     if (keys.includes('id')) {
       const object = await this._getById(this.modelName, where.id)
-      const valid = object && !keys.find(key => !isEqual(object[key], where[key]))
+      const valid = object && !keys.find(key => {
+        const normalizedKey = this._normalizeKey(key)
+        return !isEqual(get(object, normalizedKey), where[key])
+      })
       return valid ? object : undefined
     }
     const id = await this._getByFilter(this.modelName, where)
@@ -233,19 +238,20 @@ class RedisRepository {
     return `${modelName}:${id}`
   }
 
+  _normalizeKey (key) {
+    if (key.startsWith('$')) {
+      // This regex removes '$' wrapping of related entity field key
+      return key.replace(/^\$?(.+?)\$?$/g, '$1')
+    }
+    return key
+  }
+
   _normalizeFilter (filter) {
     // replacing a keys with a normalized keys in filter object
-    return Object.entries(filter).reduce((result, [key, value]) => {
-      // Parsing filter by related entity field
-      if (key.startsWith('$')) {
-        // This regex removes '$' wrapping
-        key = key.replace(/^\$?(.+?)\$?$/g, '$1')
-      }
-      return {
-        ...result,
-        [key]: value
-      }
-    }, {})
+    return Object.entries(filter).reduce((result, [key, value]) => ({
+      ...result,
+      [this._normalizeKey(key)]: value
+    }), {})
   }
 
   _buildFilterKey (modelName, filter) {
