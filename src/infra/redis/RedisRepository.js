@@ -38,7 +38,7 @@ class RedisRepository {
     const keys = Object.keys(where)
     if (keys.includes('id')) {
       const object = await this._getById(this.modelName, where.id)
-      const valid = !keys.find(key => !isEqual(object[key], where[key]))
+      const valid = object && !keys.find(key => !isEqual(object[key], where[key]))
       return valid ? object : undefined
     }
     const id = await this._getByFilter(this.modelName, where)
