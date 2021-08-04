@@ -59,7 +59,7 @@ class RedisStorage {
   async getObject (key) {
     try {
       const object = await this.redisClient.getAsync(key)
-      return JSON.parse(object)
+      return object && JSON.parse(object)
     } catch (error) {
       this.logger.error({
         event: REDIS_READ_ERROR.code,
@@ -74,17 +74,109 @@ class RedisStorage {
    * deletes key-value in Redis.
    *
    * @param {string} key the key of the object
-   * @returns {Promise<object>}
+   * @returns {Promise<Object>}
    * @throws {module:interface.standardError}
    * @memberof module:repository.RedisRepository
    */
   async deleteObject (key) {
     try {
-      await this.redisClient.delAsync(key)
+      const object = await this.redisClient.getdelAsync(key)
+      if (object) {
+        return JSON.parse(object)
+      }
     } catch (error) {
       this.logger.error({
         event: REDIS_DELETE_ERROR.code,
         info: REDIS_DELETE_ERROR.message,
+        meta: error
+      })
+      throw error
+    }
+  }
+
+  /**
+   * push items to the list in Redis. values will be JSON.stringify(value)
+   *
+   * @param {string} key the key of the object
+   * @param {Array<Object>} objects the values
+   * @returns {Promise<void>}
+   * @throws {module:interface.standardError}
+   * @memberof module:repository.RedisRepository
+   */
+  async listPush (key, ...objects) {
+    try {
+      const redisObjects = objects.map(JSON.stringify)
+      await this.redisClient.lpushAsync(key, ...redisObjects)
+    } catch (error) {
+      this.logger.error({
+        event: REDIS_CREATE_ERROR.code,
+        info: REDIS_CREATE_ERROR.message,
+        meta: error
+      })
+      throw error
+    }
+  }
+
+  /**
+   * pop items from the list in Redis. values will be JSON.stringify(value)
+   *
+   * @param {string} key the key of the object
+   * @param {Object} object value that should be removed
+   * @returns {Promise}
+   * @throws {module:interface.standardError}
+   * @memberof module:repository.RedisRepository
+   */
+  async listRemove (key, object) {
+    try {
+      const redisObject = JSON.stringify(object)
+      await this.redisClient.lremAsync(key, 1, redisObject)
+    } catch (error) {
+      this.logger.error({
+        event: REDIS_CREATE_ERROR.code,
+        info: REDIS_CREATE_ERROR.message,
+        meta: error
+      })
+      throw error
+    }
+  }
+
+  /**
+   * clear items from the list in Redis
+   *
+   * @param {string} key the key of the object
+   * @returns {Promise}
+   * @throws {module:interface.standardError}
+   * @memberof module:repository.RedisRepository
+   */
+  async listClear (key) {
+    try {
+      await this.redisClient.delAsync(key)
+    } catch (error) {
+      this.logger.error({
+        event: REDIS_CREATE_ERROR.code,
+        info: REDIS_CREATE_ERROR.message,
+        meta: error
+      })
+      throw error
+    }
+  }
+
+  /**
+   * gets list from Redis. values will be JSON.parse(result)
+   *
+   * @param {string} key the key of the list
+   * @returns {Promise<Array<object>>}
+   * @throws {module:interface.standardError}
+   * @memberof module:repository.RedisRepository
+   */
+  async getList (key) {
+    try {
+      const objects = await this.redisClient.lrangeAsync(key, 0, -1)
+      return objects ? objects.map(JSON.parse) : []
+    } catch (error) {
+      this.logger.error({
+        event: REDIS_READ_ERROR.code,
+        info: REDIS_READ_ERROR.message,
         meta: error
       })
       throw error

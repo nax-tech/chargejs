@@ -64,22 +64,8 @@ class BaseRepository {
     this.include = include
     this.cacheDisabled = cacheDisabled
 
-    if (!cacheDisabled) {
-      this.redisRepository.init(modelName)
-    }
-  }
-
-  /**
-   * Provides cache keys
-   *
-   * @param {(string[]|string)[]} keys Cache keys
-   * @throws {module:interface.standardError}
-   */
-  setCacheKeys (keys) {
-    if (this.cacheDisabled) {
-      throw this._getCacheDisabledError()
-    }
-    this.redisRepository.setCacheKeys(keys)
+    const indexes = !cacheDisabled ? model._indexes : []
+    this.redisRepository.init(modelName, indexes, include)
   }
 
   /**
@@ -234,8 +220,14 @@ class BaseRepository {
       if (!result) {
         throw this._getNotFoundError()
       }
-      return this.mapper.toEntity(result.toJSON())
+      const json = result.toJSON()
+      if (!this.cacheDisabled) {
+        await this.redisRepository.delete(json)
+      }
+      await this.redisRepository.clearRelated(json.id)
+      return this.mapper.toEntity(json)
     } catch (error) {
+      await this.redisRepository.deleteByFilter(where)
       switch (error.name) {
         case SEQUELIZE_VALIDATION_ERROR.code:
           throw this._getValidationError(error.errors)
@@ -243,10 +235,6 @@ class BaseRepository {
           throw this._getNotFoundError()
         default:
           throw error
-      }
-    } finally {
-      if (!this.cacheDisabled) {
-        await this.redisRepository.delete(where)
       }
     }
   }
@@ -279,11 +267,15 @@ class BaseRepository {
       if (!result) {
         throw this._getNotFoundError()
       }
-      return this.mapper.toEntity(result.toJSON())
-    } finally {
+      const json = result.toJSON()
       if (!this.cacheDisabled) {
-        await this.redisRepository.delete(where)
+        await this.redisRepository.delete(json)
       }
+      await this.redisRepository.clearRelated(json.id)
+      return this.mapper.toEntity(json)
+    } catch (error) {
+      await this.redisRepository.deleteByFilter(where)
+      throw error
     }
   }
 
