@@ -938,7 +938,7 @@ describe('BaseRepository', function () {
         error = e
       }
 
-      expect(error.type).to.equal('InvalidPatchAllowedFields')
+      expect(error.type).to.equal('InvalidPatchAllowedFieldsError')
     })
   })
 

@@ -126,9 +126,11 @@ export const EVENTS = {
 }
 
 export const ERROR_TYPES = {
-  INVALID_PATCH_FIELDS: 'InvalidPatchAllowedFields',
+  INVALID_PATCH_FIELDS: 'InvalidPatchAllowedFieldsError',
+  REDIS_REPOSITORY_INITIALIZED: 'RedisRepositoryAlreadyInitializedError',
   CACHE_DISABLED: 'CacheDisabledError',
-  INVALID_FILTER: 'InvalidFilterError'
+  INVALID_FILTER: 'InvalidFilterError',
+  INVALID_FILTER_VALUE: 'InvalidFilterValueError'
 }
 
 export const SEQUELIZE_ERRORS = {

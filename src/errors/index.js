@@ -38,6 +38,11 @@ export const INVALID_PATCH_FIELDS = {
   code: ERROR_TYPES.INVALID_PATCH_FIELDS
 }
 
+export const REDIS_REPOSITORY_INITIALIZED = {
+  message: 'RedisRepository already was initialized. Make sure that RedisRepository is not registered as Singleton or Scoped',
+  code: ERROR_TYPES.REDIS_REPOSITORY_INITIALIZED
+}
+
 export const CACHE_DISABLED = {
   message: 'disableCache option was set to `true`, please provide provide disableCache: `false` option to use caching',
   code: ERROR_TYPES.CACHE_DISABLED
@@ -46,6 +51,11 @@ export const CACHE_DISABLED = {
 export const INVALID_FILTER = {
   message: 'Invalid filter. Disable cache usage or configure model indexes to support provided filter fields',
   code: ERROR_TYPES.INVALID_FILTER
+}
+
+export const INVALID_FILTER_VALUE = {
+  message: 'Invalid filter field type. Valid types: string, number, boolean',
+  code: ERROR_TYPES.INVALID_FILTER_VALUE
 }
 
 export const REDIS_READ_ERROR = {

@@ -1,6 +1,6 @@
 import { get } from 'dot-get'
 import isEqual from 'lodash/isEqual'
-import { INVALID_FILTER } from '../../errors'
+import { REDIS_REPOSITORY_INITIALIZED, INVALID_FILTER, INVALID_FILTER_VALUE } from '../../errors'
 
 /**
  * A infra type module
@@ -14,6 +14,14 @@ class RedisRepository {
   }
 
   init (modelName, indexes, include) {
+    if (this._initialized) {
+      // Error for developers only, can only occur if init was called more than once
+      const error = new Error(REDIS_REPOSITORY_INITIALIZED.message)
+      error.type = REDIS_REPOSITORY_INITIALIZED.code
+      throw error
+    }
+    this._initialized = true
+
     this.modelName = modelName
     this.include = include
     this.indexes = this._normalizeIndexes(indexes)
@@ -22,12 +30,10 @@ class RedisRepository {
   async findOneOrCreate (where, getObject) {
     let object = await this.findOne(where)
     if (object) {
-      console.log('\n\nFROM CACHE:', object.object, '\n\n')
       return object
     }
     object = await getObject()
     if (object) {
-      console.log('\n\nFROM DATABASE:', object.object, '\n\n')
       return this.create(object)
     }
   }
@@ -194,11 +200,26 @@ class RedisRepository {
 
   _validateFilter (filter) {
     const normalizedFilter = this._normalizeFilter(filter)
-    const keys = Object.keys(normalizedFilter).sort()
-    const valid = keys.includes('id') || this.indexes.find(key => isEqual(key, keys))
+
+    const entries = Object.entries(normalizedFilter)
+    const allowedTypes = ['boolean', 'string', 'number']
+    const invalidValues = entries.filter(([, val]) => !allowedTypes.includes(typeof val))
+    if (invalidValues.length) {
+      // Error for developers only, can only occur if the profided filter has invalid values
+      const fields = invalidValues.map(([key, value]) => ({
+        key,
+        value,
+        type: typeof value
+      }))
+      const error = new Error(`${INVALID_FILTER_VALUE.message}: Invalid fields: ${fields}`)
+      error.type = INVALID_FILTER_VALUE.code
+      throw error
+    }
+    const sortedKeys = Object.keys(normalizedFilter).sort()
+    const valid = sortedKeys.includes('id') || this.indexes.find(key => isEqual(key, sortedKeys))
     if (!valid) {
       // Error for developers only, can only occur if the indexes configuration is incorrect
-      const error = new Error(`${INVALID_FILTER.message}: "${JSON.stringify(keys)}"`)
+      const error = new Error(`${INVALID_FILTER.message}: "${JSON.stringify(sortedKeys)}"`)
       error.type = INVALID_FILTER.code
       throw error
     }
@@ -229,7 +250,6 @@ class RedisRepository {
 
   _buildFilterKey (modelName, filter) {
     if (
-      filter &&
       Object.keys(filter).length &&
       !Object.values(filter).includes(undefined)
     ) {
