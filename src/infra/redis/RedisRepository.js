@@ -19,22 +19,28 @@ class RedisRepository {
     this.indexes = this._normalizeIndexes(indexes)
   }
 
-  async findOneOrCreate (where, getEntity) {
-    let entity = await this.findOne(where)
-    if (entity) {
-      return entity
+  async findOneOrCreate (where, getObject) {
+    let object = await this.findOne(where)
+    if (object) {
+      console.log('\n\nFROM CACHE:', object.object, '\n\n')
+      return object
     }
-    entity = await getEntity()
-    if (entity) {
-      return this.create(entity)
+    object = await getObject()
+    if (object) {
+      console.log('\n\nFROM DATABASE:', object.object, '\n\n')
+      return this.create(object)
     }
   }
 
   async findOne (where) {
-    if (isEqual(Object.keys(where), ['id'])) {
-      return this._getById(this.modelName, where.id)
-    }
     this._validateFilter(where)
+
+    const keys = Object.keys(where)
+    if (keys.includes('id')) {
+      const object = await this._getById(this.modelName, where.id)
+      const valid = !keys.find(key => !isEqual(object[key], where[key]))
+      return valid ? object : undefined
+    }
     const id = await this._getByFilter(this.modelName, where)
     if (id) {
       return this._getById(this.modelName, id)
@@ -57,10 +63,6 @@ class RedisRepository {
   }
 
   async deleteByFilter (where) {
-    if (isEqual(Object.keys(where), ['id'])) {
-      const { id } = where
-      return this._deleteById(this.modelName, this.indexes, id)
-    }
     const object = await this.findOne(where)
     if (object) {
       return this.delete(object)
@@ -82,6 +84,7 @@ class RedisRepository {
 
   _normalizeIndexes (indexes) {
     return indexes.filter(index => index.unique)
+      .filter(index => !index.fields.includes('id'))
       .map(index => index.fields.sort())
       .filter(key => !isEqual(key, ['id']))
   }
@@ -192,7 +195,7 @@ class RedisRepository {
   _validateFilter (filter) {
     const normalizedFilter = this._normalizeFilter(filter)
     const keys = Object.keys(normalizedFilter).sort()
-    const valid = this.indexes.find(key => isEqual(key, keys))
+    const valid = keys.includes('id') || this.indexes.find(key => isEqual(key, keys))
     if (!valid) {
       // Error for developers only, can only occur if the indexes configuration is incorrect
       const error = new Error(`${INVALID_FILTER.message}: "${JSON.stringify(keys)}"`)
