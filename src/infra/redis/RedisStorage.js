@@ -74,7 +74,7 @@ class RedisStorage {
    * deletes key-value in Redis.
    *
    * @param {string} key the key of the object
-   * @returns {Promise<Object|Array<Object>>}
+   * @returns {Promise<Object>}
    * @throws {module:interface.standardError}
    * @memberof module:repository.RedisRepository
    */
@@ -82,10 +82,7 @@ class RedisStorage {
     try {
       const object = await this.redisClient.getdelAsync(key)
       if (object) {
-        if (Array.isArray(object)) {
-          return object.map(JSON.stringify)
-        }
-        return JSON.stringify(object)
+        return JSON.parse(object)
       }
     } catch (error) {
       this.logger.error({
