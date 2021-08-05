@@ -17,9 +17,6 @@ export default {
   delete () {
     return true
   },
-  deleteByFilter () {
-    return true
-  },
   clearRelated () {
     return true
   }

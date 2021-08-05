@@ -65,27 +65,20 @@ class RedisRepository {
     return object
   }
 
-  delete (object) {
-    return this._delete(this.modelName, this.indexes, object)
-  }
-
-  async deleteByFilter (where) {
-    const object = await this.findOne(where)
-    if (object) {
-      return this.delete(object)
-    }
+  delete (id) {
+    return this._delete(this.modelName, this.indexes, id)
   }
 
   async clearRelated (id) {
-    const relationsKey = this._buildRelationsKey(this.modelName, id)
-    const relations = await this.redisStorage.getList(relationsKey)
+    const key = this._buildRelationsKey(this.modelName, id)
+    const relations = await this.redisStorage.getList(key)
     if (relations.length) {
       await Promise.all(
         relations.map(({ modelName, indexes, id }) => {
-          return this._deleteById(modelName, indexes, id)
+          return this._delete(modelName, indexes, id)
         })
       )
-      return this._clearList(relationsKey, relations)
+      return this._clearList(key, relations)
     }
   }
 
@@ -93,31 +86,19 @@ class RedisRepository {
     return indexes.filter(index => index.unique)
       .filter(index => !index.fields.includes('id'))
       .map(index => index.fields.sort())
-      .filter(key => !isEqual(key, ['id']))
   }
 
-  async _delete (modelName, indexes, object) {
-    const key = this._buildIdKey(modelName, object.id)
-    const result = await this._deleteObject(key) || object
-    await this._clearByCacheKeys(modelName, indexes, result)
-    return result
-  }
-
-  async _deleteById (modelName, indexes, id) {
-    const key = this._buildIdKey(modelName, id)
-    const object = await this._deleteObject(key)
+  async _delete (modelName, indexes, id) {
+    const object = await this._getById(modelName, id)
     if (object) {
-      await this._clearByCacheKeys(modelName, indexes, object)
-      return object
-    }
-  }
-
-  async _clearByCacheKeys (modelName, indexes, object) {
-    const cacheKeys = this._getObjectCacheKeys(modelName, indexes, object)
-    if (cacheKeys.length) {
-      await Promise.all(cacheKeys.map(
-        key => this._deleteObject(key)
-      ))
+      const key = this._buildIdKey(modelName, id)
+      await this._deleteObject(key, object)
+      const cacheKeys = this._getObjectCacheKeys(modelName, indexes, object)
+      if (cacheKeys.length) {
+        await Promise.all(cacheKeys.map(
+          key => this._deleteObject(key, id)
+        ))
+      }
     }
   }
 
@@ -158,7 +139,7 @@ class RedisRepository {
     }, [])
   }
 
-  async _getById (modelName, id) {
+  _getById (modelName, id) {
     const key = this._buildIdKey(modelName, id)
     return this.redisStorage.getObject(key)
   }
@@ -177,8 +158,8 @@ class RedisRepository {
     )
   }
 
-  async _saveObject (key, entry) {
-    await this.redisStorage.saveObject(key, entry)
+  async _saveObject (key, object) {
+    await this.redisStorage.saveObject(key, object)
     this.transactionProvider.addRedisRollback(
       () => this.redisStorage.deleteObject(key)
     )
@@ -191,12 +172,11 @@ class RedisRepository {
     )
   }
 
-  async _deleteObject (key) {
-    const entry = await this.redisStorage.deleteObject(key)
+  async _deleteObject (key, object) {
+    await this.redisStorage.deleteObject(key)
     this.transactionProvider.addRedisRollback(
-      () => this.redisStorage.saveObject(key, entry)
+      () => this.redisStorage.saveObject(key, object)
     )
-    return entry
   }
 
   _validateFilter (filter) {
