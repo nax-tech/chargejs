@@ -33,6 +33,11 @@ export const RETRY_REDIS = {
   code: CODES.ECONNREFUSED
 }
 
+export const INVALID_FILTER_TYPE = {
+  message: 'Filter param should be of type object',
+  code: ERROR_TYPES.INVALID_FILTER_TYPE
+}
+
 export const INVALID_PATCH_FIELDS = {
   message: 'patchAllowedFields was not configured in init function',
   code: ERROR_TYPES.INVALID_PATCH_FIELDS

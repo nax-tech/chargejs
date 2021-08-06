@@ -503,7 +503,7 @@ describe('BaseRepository', function () {
       EntityMapperStub.toEntity.should.have.been.calledOnce
       EntityMapperStub.toEntity.should.have.been.calledWith(obj)
       RedisRepositoryStub.delete.should.have.been.calledOnce
-      expect(RedisRepositoryStub.delete.getCall(0).args[0]).to.deep.equal(obj)
+      expect(RedisRepositoryStub.delete.getCall(0).args[0]).to.deep.equal(obj.id)
       expect(res).to.deep.equal(domainEntity)
 
       baseRepository._filterPatchFields.restore()
@@ -556,7 +556,6 @@ describe('BaseRepository', function () {
       sinon.spy(baseRepository, '_getNotFoundError')
       sinon.spy(EntityMapperStub, 'toEntity')
       sinon.spy(RedisRepositoryStub, 'delete')
-      sinon.spy(RedisRepositoryStub, 'deleteByFilter')
 
       baseRepository.init({
         modelName: 'modelName',
@@ -579,8 +578,7 @@ describe('BaseRepository', function () {
       expect(SequelizeModelStub.update.getCall(0).args[1].where).to.deep.equal(where)
       baseRepository._getNotFoundError.should.have.been.calledOnce
       EntityMapperStub.toEntity.should.have.not.been.called
-      RedisRepositoryStub.deleteByFilter.should.have.been.calledOnce
-      RedisRepositoryStub.deleteByFilter.should.have.been.calledWith(where)
+      RedisRepositoryStub.delete.should.have.not.been.called
       expect(error.message).to.equal('NotFoundError')
 
       baseRepository._filterPatchFields.restore()
@@ -589,7 +587,6 @@ describe('BaseRepository', function () {
       baseRepository._getNotFoundError.restore()
       EntityMapperStub.toEntity.restore()
       RedisRepositoryStub.delete.restore()
-      RedisRepositoryStub.deleteByFilter.restore()
     })
   })
 
@@ -650,7 +647,7 @@ describe('BaseRepository', function () {
       EntityMapperStub.toEntity.should.have.been.calledOnce
       EntityMapperStub.toEntity.should.have.been.calledWith(obj)
       RedisRepositoryStub.delete.should.have.been.calledOnce
-      RedisRepositoryStub.delete.should.have.been.calledWith(obj)
+      RedisRepositoryStub.delete.should.have.been.calledWith(obj.id)
       expect(res).to.deep.equal(domainEntity)
 
       baseRepository._getPatchFilter.restore()
@@ -698,7 +695,6 @@ describe('BaseRepository', function () {
       sinon.spy(baseRepository, '_getNotFoundError')
       sinon.spy(EntityMapperStub, 'toEntity')
       sinon.spy(RedisRepositoryStub, 'delete')
-      sinon.spy(RedisRepositoryStub, 'deleteByFilter')
 
       baseRepository.init({
         modelName: 'modelName',
@@ -719,8 +715,7 @@ describe('BaseRepository', function () {
       expect(SequelizeModelStub.destroy.getCall(0).args[0].where).to.deep.equal(where)
       baseRepository._getNotFoundError.should.have.been.calledOnce
       EntityMapperStub.toEntity.should.have.not.been.called
-      RedisRepositoryStub.deleteByFilter.should.have.been.calledOnce
-      RedisRepositoryStub.deleteByFilter.should.have.been.calledWith(where)
+      RedisRepositoryStub.delete.should.have.not.been.called
       expect(error.message).to.deep.equal('NotFoundError')
 
       baseRepository._getPatchFilter.restore()
@@ -728,7 +723,6 @@ describe('BaseRepository', function () {
       baseRepository._getNotFoundError.restore()
       EntityMapperStub.toEntity.restore()
       RedisRepositoryStub.delete.restore()
-      RedisRepositoryStub.deleteByFilter.restore()
     })
   })
 

@@ -1,5 +1,6 @@
 import {
   INVALID_PATCH_FIELDS,
+  INVALID_FILTER_TYPE,
   CACHE_DISABLED,
   SEQUELIZE_NOT_FOUNT_ERROR,
   SEQUELIZE_VALIDATION_ERROR
@@ -93,13 +94,15 @@ class BaseRepository {
    * @throws {module:interface.standardError}
    */
   async findOne (where, { rejectOnEmpty = true, useCache = !this.cacheDisabled } = {}) {
+    this._validateFiler(where)
+
     let result
     if (useCache) {
       if (this.cacheDisabled) {
         throw this._getCacheDisabledError()
       }
       result = await this.redisRepository.findOneOrCreate(where,
-        async () => this._dbFindOne(where)
+        () => this._dbFindOne(where)
       )
     } else {
       result = await this._dbFindOne(where)
@@ -121,6 +124,8 @@ class BaseRepository {
    * @throws {module:interface.standardError}
    */
   async findAll (where, options = {}) {
+    this._validateFiler(where)
+
     const results = await this.model.findAll({
       order: [['createdAt', 'DESC']],
       ...options,
@@ -147,6 +152,8 @@ class BaseRepository {
    * @throws {module:interface.standardError}
    */
   async findAndCountAll (where, currentPage, pageSize, options = {}) {
+    this._validateFiler(where)
+
     const { limit, offset } = this.calculateLimitAndOffset(
       currentPage,
       pageSize
@@ -205,6 +212,8 @@ class BaseRepository {
    * @throws {module:interface.standardError}
    */
   async patch (where, updateFields) {
+    this._validateFiler(where)
+
     const filteredFields = this._filterPatchFields(updateFields)
     try {
       const filter = await this._getPatchFilter(where)
@@ -221,13 +230,9 @@ class BaseRepository {
         throw this._getNotFoundError()
       }
       const json = result.toJSON()
-      if (!this.cacheDisabled) {
-        await this.redisRepository.delete(json)
-      }
-      await this.redisRepository.clearRelated(json.id)
+      await this._clearCache(json.id)
       return this.mapper.toEntity(json)
     } catch (error) {
-      await this.redisRepository.deleteByFilter(where)
       switch (error.name) {
         case SEQUELIZE_VALIDATION_ERROR.code:
           throw this._getValidationError(error.errors)
@@ -258,6 +263,8 @@ class BaseRepository {
    * @throws {module:interface.standardError}
    */
   async delete (where) {
+    this._validateFiler(where)
+
     try {
       const filter = await this._getPatchFilter(where)
       const [, result] = await this.model.destroy({
@@ -268,14 +275,17 @@ class BaseRepository {
         throw this._getNotFoundError()
       }
       const json = result.toJSON()
-      if (!this.cacheDisabled) {
-        await this.redisRepository.delete(json)
-      }
-      await this.redisRepository.clearRelated(json.id)
+      await this._clearCache(json.id)
       return this.mapper.toEntity(json)
     } catch (error) {
-      await this.redisRepository.deleteByFilter(where)
-      throw error
+      switch (error.name) {
+        case SEQUELIZE_VALIDATION_ERROR.code:
+          throw this._getValidationError(error.errors)
+        case SEQUELIZE_NOT_FOUNT_ERROR.code:
+          throw this._getNotFoundError()
+        default:
+          throw error
+      }
     }
   }
 
@@ -291,6 +301,13 @@ class BaseRepository {
     if (result) {
       return result.toJSON()
     }
+  }
+
+  async _clearCache (id) {
+    if (!this.cacheDisabled) {
+      await this.redisRepository.delete(id)
+    }
+    await this.redisRepository.clearRelated(id)
   }
 
   async _getPatchFilter (where) {
@@ -311,6 +328,15 @@ class BaseRepository {
 
   _getTransaction () {
     return this.transactionProvider.getSequelizeTransaction()
+  }
+
+  _validateFiler (filter) {
+    if (typeof filter !== 'object') {
+      // Error for developers only, can only occur if the filter type is invalid
+      const error = new Error(INVALID_FILTER_TYPE)
+      error.type = INVALID_FILTER_TYPE.code
+      throw error
+    }
   }
 
   _filterPatchFields (updateFields) {

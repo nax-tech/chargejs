@@ -59,7 +59,9 @@ class RedisStorage {
   async getObject (key) {
     try {
       const object = await this.redisClient.getAsync(key)
-      return object && JSON.parse(object)
+      if (object) {
+        return JSON.parse(object)
+      }
     } catch (error) {
       this.logger.error({
         event: REDIS_READ_ERROR.code,
@@ -74,16 +76,13 @@ class RedisStorage {
    * deletes key-value in Redis.
    *
    * @param {string} key the key of the object
-   * @returns {Promise<Object>}
+   * @returns {Promise<void>}
    * @throws {module:interface.standardError}
    * @memberof module:repository.RedisRepository
    */
   async deleteObject (key) {
     try {
-      const object = await this.redisClient.getdelAsync(key)
-      if (object) {
-        return JSON.parse(object)
-      }
+      await this.redisClient.delAsync(key)
     } catch (error) {
       this.logger.error({
         event: REDIS_DELETE_ERROR.code,
