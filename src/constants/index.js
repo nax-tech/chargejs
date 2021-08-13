@@ -60,7 +60,13 @@ export const KIND = {
   SMS: 'sms'
 }
 
-export const NOTIFICATION_PUSH_COPY = {
+export const NOTIFICATION_PUSH_TEXT = {
+  DEVICE: {
+    VERIFIED: {
+      TITLE: 'Device verified',
+      BODY: 'Your device has been successfully verified'
+    }
+  },
   PAYMENT: {
     NEW: {
       TITLE: 'New Payment',
