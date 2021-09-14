@@ -392,13 +392,13 @@ export const createNotifications = (settingsId) => {
       settingsId,
       kind: NOTIFICATION_KIND.email,
       sourceType: NOTIFICATION_SOURCE_TYPES.cards,
-      type: NOTIFICATION_TYPES.accepted
+      type: NOTIFICATION_TYPES.declined
     },
     {
       settingsId,
       kind: NOTIFICATION_KIND.email,
       sourceType: NOTIFICATION_SOURCE_TYPES.cards,
-      type: NOTIFICATION_TYPES.declined
+      type: NOTIFICATION_TYPES.accepted
     },
     {
       settingsId,
