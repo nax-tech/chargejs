@@ -241,6 +241,12 @@ export const NOTIFICATION_PUSH = {
         body: NOTIFICATION_PUSH_TEXT.PROFILE.EMAIL.UPDATED.BODY
       }
     },
+    password: {
+      updated: {
+        title: NOTIFICATION_PUSH_TEXT.PROFILE.PASSWORD.UPDATED.TITLE,
+        body: NOTIFICATION_PUSH_TEXT.PROFILE.PASSWORD.UPDATED.BODY
+      }
+    },
     phone: {
       updated: {
         title: NOTIFICATION_PUSH_TEXT.PROFILE.PHONE.UPDATED.TITLE,
