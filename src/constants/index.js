@@ -88,6 +88,12 @@ export const NOTIFICATION_PUSH_TEXT = {
         BODY: 'Your email address has been successfully updated!'
       }
     },
+    PASSWORD: {
+      UPDATED: {
+        TITLE: 'Password Changed',
+        BODY: 'Your password has been successfully changed!'
+      }
+    },
     PHONE: {
       UPDATED: {
         TITLE: 'Phone Number Updated',
