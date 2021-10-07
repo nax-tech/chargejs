@@ -47,6 +47,7 @@ export const TYPES = {
   UPDATED: 'updated',
   ACCEPTED: 'accepted',
   DECLINED: 'declined',
+  FAILED: 'failed',
   VERIFICATION: 'verification',
   VERIFIED: 'verified',
   NEW: 'newItem',
@@ -79,6 +80,10 @@ export const NOTIFICATION_PUSH_TEXT = {
     DECLINED: {
       TITLE: 'Payment Declined',
       BODY: 'You have declined a payment from'
+    },
+    FAILED: {
+      TITLE: 'Payment Failed',
+      BODY: 'Your payment failed'
     }
   },
   PROFILE: {

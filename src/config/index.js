@@ -209,6 +209,7 @@ export const NOTIFICATION_TYPES = {
   updated: TYPES.UPDATED,
   accepted: TYPES.ACCEPTED,
   declined: TYPES.DECLINED,
+  failed: TYPES.FAILED,
   verification: TYPES.VERIFICATION,
   verified: TYPES.VERIFIED,
   new: TYPES.NEW,
@@ -232,6 +233,10 @@ export const NOTIFICATION_PUSH = {
     declined: {
       title: NOTIFICATION_PUSH_TEXT.PAYMENT.DECLINED.TITLE,
       body: NOTIFICATION_PUSH_TEXT.PAYMENT.DECLINED.BODY
+    },
+    failed: {
+      title: NOTIFICATION_PUSH_TEXT.PAYMENT.FAILED.TITLE,
+      body: NOTIFICATION_PUSH_TEXT.PAYMENT.FAILED.BODY
     }
   },
   profile: {
@@ -417,6 +422,12 @@ export const createNotifications = (settingsId) => {
       kind: NOTIFICATION_KIND.push,
       sourceType: NOTIFICATION_SOURCE_TYPES.cards,
       type: NOTIFICATION_TYPES.declined
+    },
+    {
+      settingsId,
+      kind: NOTIFICATION_KIND.push,
+      sourceType: NOTIFICATION_SOURCE_TYPES.cards,
+      type: NOTIFICATION_TYPES.failed
     },
     {
       settingsId,
