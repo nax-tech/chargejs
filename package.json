@@ -58,6 +58,9 @@
     "structure": "^2.0.1",
     "winston": "^3.2.1"
   },
+  "peerDependencies": {
+    "awilix-express": "^5.0.0"
+  },
   "directories": {
     "doc": "docs",
     "test": "tests"

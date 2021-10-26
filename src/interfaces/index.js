@@ -5,6 +5,7 @@ import http from 'http'
 import https from 'https'
 import Status from 'http-status'
 import { validationResult } from 'express-validator'
+import { makeInvoker } from 'awilix-express'
 
 /**
  * A module for common interfaces
@@ -236,6 +237,25 @@ export const createControllerRoutes = controllerUri => {
   const Controller = require(controllerPath)
 
   return Controller.router
+}
+
+/**
+ * Creates a containerized API for controller functions
+ *
+ * @memberof module:interface
+ * @param {function[]} controllerFns controller functions
+ * @returns {external:awilix-express.invoker} the awilix-express invoker object
+ */
+export function getApi (controllerFns) {
+  const makeAPI = (container) =>
+    Object.fromEntries(
+      Object.entries(controllerFns).map(([name, fn]) => [
+        name,
+        (req, res, next) => fn(req, res, next, container)
+      ])
+    )
+
+  return makeInvoker(makeAPI)
 }
 
 /**
