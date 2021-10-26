@@ -113,7 +113,18 @@ export const devErrorHandler = (err, req, res, next) => {
  *
  */
 export const deviceMiddleware = (req, res, next) => {
-  deviceIPLocation.getInfo(req.headers['user-agent'], req.ip, (err, res) => {
+  const userAgentHeader = req.headers['user-agent']
+
+  if (!userAgentHeader) {
+    res.status(Status.BAD_REQUEST).send({
+      error: {
+        type: Status['400_NAME'],
+        message: 'No User-Agent string header provided.'
+      }
+    })
+  }
+
+  deviceIPLocation.getInfo(userAgentHeader, req.ip, (err, res) => {
     if (err) {
       req.origin = { error: err }
     } else {
