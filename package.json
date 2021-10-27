@@ -46,7 +46,6 @@
   },
   "dependencies": {
     "bluebird": "^3.7.2",
-    "device-ip-location": "^1.0.27",
     "dot-get": "^1.0.1",
     "ein-validator": "^1.0.0",
     "esm": "^3.2.25",
@@ -55,6 +54,7 @@
     "http-status": "^1.4.2",
     "https": "^1.0.0",
     "lodash": "^4.17.20",
+    "node-device-detector": "^1.3.11",
     "structure": "^2.0.1",
     "winston": "^3.2.1"
   },
