@@ -43,7 +43,6 @@ class BaseRepository {
    * Provides configuration for BaseRepository.
    *
    * @param {Object} input The input object as injected in src/container.js
-   * @param {string} input.modelName The model name
    * @param {Object} input.model The db model
    * @param {Object} input.mapper The entity mapper
    * @param {string[]} [input.patchAllowedFields] The patch allowed fields array
@@ -51,22 +50,25 @@ class BaseRepository {
    * @param {boolean} [input.cacheDisabled=false] Disable cahing
    */
   init ({
-    modelName,
     model,
     mapper,
     patchAllowedFields = undefined,
-    include = undefined,
+    include = [],
     cacheDisabled = false
   }) {
-    this.modelName = modelName
+    this.modelName = this._getModelName(model)
     this.model = model
     this.mapper = mapper
     this.patchAllowedFields = patchAllowedFields
     this.include = include
     this.cacheDisabled = cacheDisabled
 
-    const indexes = !cacheDisabled ? model._indexes : []
-    this.redisRepository.init(modelName, indexes, include)
+    this.redisRepository.init({
+      modelName: this.modelName,
+      indexes: this._getIndexes(model),
+      include: this._normalizeInclude(include),
+      references: this._getReferences(model)
+    })
   }
 
   /**
@@ -126,14 +128,14 @@ class BaseRepository {
   async findAll (where, options = {}) {
     this._validateFiler(where)
 
-    const results = await this.model.findAll({
+    const rows = await this.model.findAll({
       order: [['createdAt', 'DESC']],
       ...options,
       where,
       include: this.include,
       transaction: this._getTransaction()
     })
-    return results.map(entry => entry.toJSON())
+    return rows.map(row => this.mapper.toEntity(row.toJSON()))
   }
 
   /**
@@ -169,7 +171,10 @@ class BaseRepository {
       transaction: this._getTransaction()
     })
     const meta = this.paginate(currentPage, count, rows, pageSize)
-    return { data: rows.map(row => row.toJSON()), meta }
+    return {
+      data: rows.map(row => this.mapper.toEntity(row.toJSON())),
+      meta
+    }
   }
 
   /**
@@ -188,7 +193,9 @@ class BaseRepository {
       this.mapper.toDatabase(entity),
       { transaction: this._getTransaction() }
     )
-    return this.mapper.toEntity(dbEntry.toJSON())
+    const json = dbEntry.toJSON()
+    await this._clearCache(json, true)
+    return this.mapper.toEntity(json)
   }
 
   /**
@@ -230,7 +237,7 @@ class BaseRepository {
         throw this._getNotFoundError()
       }
       const json = result.toJSON()
-      await this._clearCache(json.id)
+      await this._clearCache(json)
       return this.mapper.toEntity(json)
     } catch (error) {
       switch (error.name) {
@@ -275,7 +282,7 @@ class BaseRepository {
         throw this._getNotFoundError()
       }
       const json = result.toJSON()
-      await this._clearCache(json.id)
+      await this._clearCache(json)
       return this.mapper.toEntity(json)
     } catch (error) {
       switch (error.name) {
@@ -290,6 +297,44 @@ class BaseRepository {
   }
 
   // Private
+  _getModelName (model) {
+    const modelName = model.options.name.singular
+    return modelName.charAt(0).toLowerCase() + modelName.slice(1)
+  }
+
+  _getReferences (model) {
+    const models = Object.values(model.sequalize.models)
+    return Object.values(model.rawAttributes)
+      .filter(({ references }) => references && references.key === 'id')
+      .map(attr => {
+        const { model } = attr.references
+        const m = models.find(m => m.tableName === model)
+        return {
+          modelName: this._getModelName(m),
+          fieldName: attr.fieldName
+        }
+      })
+  }
+
+  _normalizeInclude (include) {
+    return include.map(({ model, as, include }) => ({
+      modelName: this._getModelName(model),
+      as,
+      include: include && this._normalizeInclude(include)
+    }))
+  }
+
+  _getIndexes (model) {
+    const models = Object.values(model.sequalize.models)
+    const entries = models.map(model => {
+      const modelName = this._getModelName(model)
+      const indexes = (model.options.indexes || [])
+        .filter(index => index.unique)
+        .map(index => index.fields)
+      return [modelName, indexes]
+    })
+    return Object.fromEntries(entries)
+  }
 
   async _dbFindOne (where) {
     const result = await this.model.findOne({
@@ -303,11 +348,11 @@ class BaseRepository {
     }
   }
 
-  async _clearCache (id) {
-    if (!this.cacheDisabled) {
-      await this.redisRepository.delete(id)
+  async _clearCache (entity, skipReferenced = false) {
+    if (!this.cacheDisabled && !skipReferenced) {
+      await this.redisRepository.delete(entity)
     }
-    await this.redisRepository.clearRelated(id)
+    await this.redisRepository.clearRelated(entity, skipReferenced)
   }
 
   async _getPatchFilter (where) {
@@ -383,7 +428,7 @@ class BaseRepository {
   }
 
   _getCapitalizedModelName () {
-    return this.modelName.charAt(0).toUpperCase() + this.modelName.slice(1)
+    return this.model.options.name.singular
   }
 
   _notFoundErrorMessage () {

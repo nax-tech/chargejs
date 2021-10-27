@@ -50,7 +50,6 @@ describe('BaseRepository', function () {
 
   describe('init', function () {
     const opts = {
-      modelName: 'modelName',
       model: SequelizeModelStub,
       mapper: EntityMapperStub,
       patchAllowedFields: ['field', 'field2'],
@@ -64,10 +63,33 @@ describe('BaseRepository', function () {
       cacheDisabled: false
     }
     it('should init BaseRepository', async function () {
+      sinon.spy(RedisRepositoryStub, 'init')
       baseRepository.init(opts)
       Object.entries(opts).forEach(([key, value]) => {
         expect(baseRepository[key]).to.deep.equal(value)
       })
+      expect(baseRepository.modelName).to.deep.equal('modelName')
+      RedisRepositoryStub.init.should.have.been.calledWith({
+        modelName: 'modelName',
+        indexes: {
+          modelName: [
+            ['a', 'b'],
+            ['c', 'd']
+          ],
+          other: []
+        },
+        references: [
+          { modelName: 'other', fieldName: 'otherId' }
+        ],
+        include: [
+          {
+            modelName: 'modelName',
+            as: 'realted',
+            include: undefined
+          }
+        ]
+      })
+      RedisRepositoryStub.init.restore()
     })
   })
 
@@ -503,7 +525,7 @@ describe('BaseRepository', function () {
       EntityMapperStub.toEntity.should.have.been.calledOnce
       EntityMapperStub.toEntity.should.have.been.calledWith(obj)
       RedisRepositoryStub.delete.should.have.been.calledOnce
-      expect(RedisRepositoryStub.delete.getCall(0).args[0]).to.deep.equal(obj.id)
+      expect(RedisRepositoryStub.delete.getCall(0).args[0]).to.deep.equal(obj)
       expect(res).to.deep.equal(domainEntity)
 
       baseRepository._filterPatchFields.restore()
@@ -647,7 +669,7 @@ describe('BaseRepository', function () {
       EntityMapperStub.toEntity.should.have.been.calledOnce
       EntityMapperStub.toEntity.should.have.been.calledWith(obj)
       RedisRepositoryStub.delete.should.have.been.calledOnce
-      RedisRepositoryStub.delete.should.have.been.calledWith(obj.id)
+      RedisRepositoryStub.delete.should.have.been.calledWith(obj)
       expect(res).to.deep.equal(domainEntity)
 
       baseRepository._getPatchFilter.restore()
