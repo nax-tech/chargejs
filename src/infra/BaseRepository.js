@@ -3,7 +3,9 @@ import {
   INVALID_FILTER_TYPE,
   CACHE_DISABLED,
   SEQUELIZE_NOT_FOUNT_ERROR,
-  SEQUELIZE_VALIDATION_ERROR
+  SEQUELIZE_VALIDATION_ERROR,
+  INVALID_PAGE_SIZE,
+  INVALID_CURRENT_PAGE
 } from '../errors'
 
 /**
@@ -94,16 +96,14 @@ class BaseRepository {
    * @throws {module:interface.standardError}
    */
   async findOne (where, { rejectOnEmpty = true, useCache = !this.cacheDisabled } = {}) {
-    this._validateFiler(where)
+    this._validateFilter(where)
 
     let result
     if (useCache) {
       if (this.cacheDisabled) {
         throw this._getCacheDisabledError()
       }
-      result = await this.redisRepository.findOneOrCreate(where,
-        () => this._dbFindOne(where)
-      )
+      result = await this.redisRepository.findOneOrCreate(where, () => this._dbFindOne(where))
     } else {
       result = await this._dbFindOne(where)
     }
@@ -124,7 +124,7 @@ class BaseRepository {
    * @throws {module:interface.standardError}
    */
   async findAll (where, options = {}) {
-    this._validateFiler(where)
+    this._validateFilter(where)
 
     const results = await this.model.findAll({
       order: [['createdAt', 'DESC']],
@@ -133,13 +133,13 @@ class BaseRepository {
       include: this.include,
       transaction: this._getTransaction()
     })
-    return results.map(entry => entry.toJSON())
+    return results.map((entry) => entry.toJSON())
   }
 
   /**
-  * Pagination meta
-  * @typedef {({ currentPage: number, pageCount: number, pageSize: number, count: number })} Meta
-  */
+   * Pagination meta
+   * @typedef {({ currentPage: number, pageCount: number, pageSize: number, count: number })} Meta
+   */
 
   /**
    * Finds entities with pagination
@@ -152,12 +152,11 @@ class BaseRepository {
    * @throws {module:interface.standardError}
    */
   async findAndCountAll (where, currentPage, pageSize, options = {}) {
-    this._validateFiler(where)
+    this._validateFilter(where)
+    this._validatePaginateParams(currentPage, pageSize)
 
-    const { limit, offset } = this.calculateLimitAndOffset(
-      currentPage,
-      pageSize
-    )
+    const { limit, offset } = this.calculateLimitAndOffset(currentPage, pageSize)
+
     const { rows, count } = await this.model.findAndCountAll({
       order: [['createdAt', 'DESC']],
       ...options,
@@ -169,7 +168,7 @@ class BaseRepository {
       transaction: this._getTransaction()
     })
     const meta = this.paginate(currentPage, count, rows, pageSize)
-    return { data: rows.map(row => row.toJSON()), meta }
+    return { data: rows.map((row) => row.toJSON()), meta }
   }
 
   /**
@@ -184,10 +183,9 @@ class BaseRepository {
     if (!valid) {
       throw this._getValidationError(errors)
     }
-    const dbEntry = await this.model.create(
-      this.mapper.toDatabase(entity),
-      { transaction: this._getTransaction() }
-    )
+    const dbEntry = await this.model.create(this.mapper.toDatabase(entity), {
+      transaction: this._getTransaction()
+    })
     return this.mapper.toEntity(dbEntry.toJSON())
   }
 
@@ -212,20 +210,17 @@ class BaseRepository {
    * @throws {module:interface.standardError}
    */
   async patch (where, updateFields) {
-    this._validateFiler(where)
+    this._validateFilter(where)
 
     const filteredFields = this._filterPatchFields(updateFields)
     try {
       const filter = await this._getPatchFilter(where)
-      const [, result] = await this.model.update(
-        filteredFields,
-        {
-          where: filter,
-          returning: true,
-          plain: true,
-          transaction: this._getTransaction()
-        }
-      )
+      const [, result] = await this.model.update(filteredFields, {
+        where: filter,
+        returning: true,
+        plain: true,
+        transaction: this._getTransaction()
+      })
       if (!result) {
         throw this._getNotFoundError()
       }
@@ -263,7 +258,7 @@ class BaseRepository {
    * @throws {module:interface.standardError}
    */
   async delete (where) {
-    this._validateFiler(where)
+    this._validateFilter(where)
 
     try {
       const filter = await this._getPatchFilter(where)
@@ -313,11 +308,10 @@ class BaseRepository {
   async _getPatchFilter (where) {
     // Update and Destroy requests do not support filtering by
     // related entities fields, so we should do Find request to get entity id
-    const hasRelatedEntityFilter = Object.keys(where)
-      .find(key => key.startsWith('$'))
+    const hasRelatedEntityFilter = Object.keys(where).find((key) => key.startsWith('$'))
     if (hasRelatedEntityFilter) {
       const cachedEntity = await this.redisRepository.findOne(where)
-      const entity = cachedEntity || await this._dbFindOne(where)
+      const entity = cachedEntity || (await this._dbFindOne(where))
       if (!entity) {
         throw this._getNotFoundError()
       }
@@ -330,11 +324,33 @@ class BaseRepository {
     return this.transactionProvider.getSequelizeTransaction()
   }
 
-  _validateFiler (filter) {
+  _validateFilter (filter) {
     if (typeof filter !== 'object') {
       // Error for developers only, can only occur if the filter type is invalid
-      const error = new Error(INVALID_FILTER_TYPE)
+      const error = new Error(INVALID_FILTER_TYPE.message)
       error.type = INVALID_FILTER_TYPE.code
+      throw error
+    }
+  }
+
+  _validatePaginateParams (currentPage, pageSize) {
+    console.log({
+      _validatePaginateParams: {
+        currentPage,
+        pageSize
+      }
+    })
+    if (Number.isNaN(Number(currentPage))) {
+      // Error for developers only, can only occur if the currentPage is invalid
+      const error = new Error(INVALID_CURRENT_PAGE.message)
+      error.type = INVALID_CURRENT_PAGE.code
+      throw error
+    }
+
+    if (Number.isNaN(Number(pageSize))) {
+      // Error for developers only, can only occur if the pageSize is invalid
+      const error = new Error(INVALID_PAGE_SIZE.message)
+      error.type = INVALID_PAGE_SIZE.code
       throw error
     }
   }
@@ -347,11 +363,14 @@ class BaseRepository {
       throw error
     }
     return Object.keys(updateFields)
-      .filter(key => this.patchAllowedFields.includes(key))
-      .reduce((filteredObject, key) => ({
-        ...filteredObject,
-        [key]: updateFields[key]
-      }), {})
+      .filter((key) => this.patchAllowedFields.includes(key))
+      .reduce(
+        (filteredObject, key) => ({
+          ...filteredObject,
+          [key]: updateFields[key]
+        }),
+        {}
+      )
   }
 
   _getNotFoundError () {
@@ -374,7 +393,7 @@ class BaseRepository {
     return this.standardError({
       type: this.logmsg.errors.validationError,
       message: errorMessage,
-      errors: errors.map(error => ({
+      errors: errors.map((error) => ({
         param: this.modelName,
         msg: error.message,
         location: error.path
