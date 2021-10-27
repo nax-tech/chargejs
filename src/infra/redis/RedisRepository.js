@@ -90,7 +90,7 @@ class RedisRepository {
     const relations = this.references.map(({ modelName, fieldName }) => ({
       modelName,
       id: object[fieldName]
-    }))
+    })).filter(r => r.id)
     if (skipReferenced) {
       return relations
     }
