@@ -142,8 +142,7 @@ export const deviceMiddleware = (req, res, next) => {
 export const errorHandler = (err, req, res, next) => {
   res.status(Status.INTERNAL_SERVER_ERROR).json({
     type: 'InternalServerError',
-    message: 'The server failed to handle this request',
-    errors: err.errors
+    message: 'The server failed to handle this request'
   })
 }
 /**

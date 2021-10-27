@@ -1,5 +1,5 @@
 import { get } from 'dot-get'
-import isEqual from 'lodash/isEqual'
+import { isEqual, unionWith } from 'lodash'
 import { REDIS_REPOSITORY_INITIALIZED, INVALID_FILTER, INVALID_FILTER_VALUE } from '../../errors'
 
 /**
@@ -13,7 +13,12 @@ class RedisRepository {
     this.transactionProvider = transactionProvider
   }
 
-  init (modelName, indexes, include) {
+  init ({
+    modelName,
+    indexes,
+    include,
+    references
+  }) {
     if (this._initialized) {
       // Error for developers only, can only occur if init was called more than once
       const error = new Error(REDIS_REPOSITORY_INITIALIZED.message)
@@ -24,6 +29,7 @@ class RedisRepository {
     this.modelName = modelName
     this.include = include
     this.indexes = this._normalizeIndexes(indexes)
+    this.references = references
   }
 
   async findOneOrCreate (where, getObject) {
@@ -57,43 +63,55 @@ class RedisRepository {
   async create (object) {
     const idKey = this._buildIdKey(this.modelName, object.id)
     await this._saveObject(idKey, object)
-    const cacheKeys = this._getObjectCacheKeys(this.modelName, this.indexes, object)
+    const cacheKeys = this._getObjectCacheKeys(this.modelName, object)
     await Promise.all(cacheKeys.map(
       key => this._saveObject(key, object.id)
     ))
-    await this._storeRelated(object)
+    await this._storeIncluded(object)
     return object
   }
 
-  delete (id) {
-    return this._delete(this.modelName, this.indexes, id)
+  delete ({ id }) {
+    return this._delete(this.modelName, id)
   }
 
-  async clearRelated (id) {
-    const key = this._buildRelationsKey(this.modelName, id)
-    const relations = await this.redisStorage.getList(key)
-    if (relations.length) {
-      await Promise.all(
-        relations.map(({ modelName, indexes, id }) => {
-          return this._delete(modelName, indexes, id)
+  async clearRelated (object, skipReferenced = false) {
+    const related = await this._getRelated(object, skipReferenced)
+    if (related.length) {
+      return Promise.all(
+        related.map(({ modelName, id }) => {
+          return this._delete(modelName, id)
         })
       )
-      return this._clearList(key, relations)
     }
   }
 
-  _normalizeIndexes (indexes) {
-    return indexes.filter(index => index.unique)
-      .filter(index => !index.fields.includes('id'))
-      .map(index => index.fields.sort())
+  async _getRelated (object, skipReferenced) {
+    const relations = this.references.map(({ modelName, fieldName }) => ({
+      modelName,
+      id: object[fieldName]
+    }))
+    if (skipReferenced) {
+      return relations
+    }
+    const key = this._buildRelationsKey(this.modelName, object.id)
+    const storedRelations = await this.redisStorage.getList(key)
+    await this._clearList(key, storedRelations)
+    return unionWith(relations, storedRelations, isEqual)
   }
 
-  async _delete (modelName, indexes, id) {
+  _normalizeIndexes (indexes) {
+    return indexes
+      .filter(fields => !fields.includes('id'))
+      .map(fields => fields.sort())
+  }
+
+  async _delete (modelName, id) {
     const object = await this._getById(modelName, id)
     if (object) {
       const key = this._buildIdKey(modelName, id)
       await this._deleteObject(key, object)
-      const cacheKeys = this._getObjectCacheKeys(modelName, indexes, object)
+      const cacheKeys = this._getObjectCacheKeys(modelName, object)
       if (cacheKeys.length) {
         await Promise.all(cacheKeys.map(
           key => this._deleteObject(key, id)
@@ -102,17 +120,16 @@ class RedisRepository {
     }
   }
 
-  async _storeRelated (entity) {
-    if (this.include && this.include.length) {
+  async _storeIncluded (entity) {
+    if (this.include.length) {
       const entityInfo = {
         id: entity.id,
-        modelName: this.modelName,
-        indexes: this.indexes
+        modelName: this.modelName
       }
-      const related = this._getRelated(entity, this.include)
-      if (related.length) {
+      const included = this._getIncluded(entity, this.include)
+      if (included.length) {
         await Promise.all(
-          related
+          included
             .map(({ modelName, id }) => this._buildRelationsKey(modelName, id))
             .map(key => this._pushToList(key, entityInfo))
         )
@@ -120,7 +137,7 @@ class RedisRepository {
     }
   }
 
-  _getRelated (entity, include) {
+  _getIncluded (entity, include) {
     return include.reduce((result, { modelName, as, include }) => {
       const related = entity[as]
       if (related) {
@@ -131,7 +148,7 @@ class RedisRepository {
             id: object.id
           })
           if (include) {
-            result.push(...this._getRelated(object, include))
+            result.push(...this._getIncluded(object, include))
           }
         })
       }
@@ -196,7 +213,8 @@ class RedisRepository {
       throw error
     }
     const sortedKeys = Object.keys(normalizedFilter).sort()
-    const valid = sortedKeys.includes('id') || this.indexes.find(key => isEqual(key, sortedKeys))
+    const indexes = this.indexes[this.modelName]
+    const valid = sortedKeys.includes('id') || indexes.find(key => isEqual(key, sortedKeys))
     if (!valid) {
       // Error for developers only, can only occur if the indexes configuration is incorrect
       const error = new Error(`${INVALID_FILTER.message}: "${JSON.stringify(sortedKeys)}"`)
@@ -243,8 +261,8 @@ class RedisRepository {
     }
   }
 
-  _getObjectCacheKeys (modelName, indexes, object) {
-    return indexes.map(index => {
+  _getObjectCacheKeys (modelName, object) {
+    return this.indexes[modelName].map(index => {
       const filter = index.reduce((res, field) => ({
         ...res,
         [field]: get(object, field)
