@@ -1,4 +1,3 @@
-import deviceIPLocation from 'device-ip-location'
 import path from 'path'
 import express from 'express'
 import http from 'http'
@@ -6,6 +5,7 @@ import https from 'https'
 import Status from 'http-status'
 import { validationResult } from 'express-validator'
 import { makeInvoker } from 'awilix-express'
+import DeviceDetector from 'node-device-detector'
 
 /**
  * A module for common interfaces
@@ -68,7 +68,7 @@ export const standardError = ({
 }) => {
   const extractedErrors = []
   if (errors !== undefined && Array.isArray(errors)) {
-    errors.map(err =>
+    errors.map((err) =>
       extractedErrors.push({
         [err.param]: err.msg,
         location: err.location
@@ -124,20 +124,14 @@ export const deviceMiddleware = (req, res, next) => {
     })
   }
 
-  deviceIPLocation.getInfo(userAgentHeader, req.ip, (err, res) => {
-    if (err) {
-      req.origin = { error: err }
-    } else {
-      req.origin = res
-      req.origin.client = {
-        xForwardedFor: req.headers['X-Forwarded-For'],
-        xForwardedProto: req.headers['X-Forwarded-Proto'],
-        xForwardedPort: req.headers['X-Forwarded-Port']
-      }
-    }
+  req.origin.device = new DeviceDetector().detect(userAgentHeader)
+  req.origin.client = {
+    xForwardedFor: req.headers['X-Forwarded-For'],
+    xForwardedProto: req.headers['X-Forwarded-Proto'],
+    xForwardedPort: req.headers['X-Forwarded-Port']
+  }
 
-    next()
-  })
+  next()
 }
 
 /**
@@ -193,7 +187,7 @@ export const validate = (req, res, next) => {
   const extractedErrors = []
   errors
     .array()
-    .map(err =>
+    .map((err) =>
       extractedErrors.push({ [err.param]: err.msg, location: err.location })
     )
 
@@ -215,7 +209,7 @@ export const validate = (req, res, next) => {
  * @param {object} origin the req.origin object to encode
  * @returns {string}
  */
-export const originEncoder = origin => {
+export const originEncoder = (origin) => {
   return Buffer.from(JSON.stringify(origin)).toString('base64')
 }
 
@@ -243,7 +237,7 @@ export const originDecoder = (req, res, next) => {
  * @param {string} controllerUri the path to the controller
  * @returns {external:express.res} the express res object
  */
-export const createControllerRoutes = controllerUri => {
+export const createControllerRoutes = (controllerUri) => {
   const controllerPath = path.resolve('src/interfaces/http', controllerUri)
   const Controller = require(controllerPath)
 
@@ -320,7 +314,7 @@ export class Server {
         ? http.createServer(this.express)
         : https.createServer(this.tlsOptions(), this.express)
 
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const http = server.listen(this.config.web.port, '0.0.0.0', () => {
         const { port } = http.address()
         const { logmsg } = this.config
