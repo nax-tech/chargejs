@@ -34,8 +34,18 @@ export const RETRY_REDIS = {
 }
 
 export const INVALID_FILTER_TYPE = {
-  message: 'Filter param should be of type object',
+  message: 'Filter parameter should be of type object',
   code: ERROR_TYPES.INVALID_FILTER_TYPE
+}
+
+export const INVALID_CURRENT_PAGE = {
+  message: 'currentPage parameter should be a valid number',
+  code: ERROR_TYPES.INVALID_PAGINATE_PARAMS
+}
+
+export const INVALID_PAGE_SIZE = {
+  message: 'pageSize parameter should be a valid number',
+  code: ERROR_TYPES.INVALID_PAGINATE_PARAMS
 }
 
 export const INVALID_PATCH_FIELDS = {
