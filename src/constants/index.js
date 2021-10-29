@@ -1,11 +1,4 @@
-export const ALLOWED_ENVIRONMENTS = [
-  'development',
-  'dev',
-  'stage',
-  'production',
-  'prod',
-  'test'
-]
+export const ALLOWED_ENVIRONMENTS = ['development', 'dev', 'stage', 'production', 'prod', 'test']
 export const ALLOWED_PACKAGES = [
   'api-gateway',
   'payments',
@@ -149,7 +142,8 @@ export const ERROR_TYPES = {
   CACHE_DISABLED: 'CacheDisabledError',
   INVALID_FILTER: 'InvalidFilterError',
   INVALID_FILTER_VALUE: 'InvalidFilterValueError',
-  INVALID_FILTER_TYPE: 'InvalidFIlterTypeError'
+  INVALID_FILTER_TYPE: 'InvalidFIlterTypeError',
+  INVALID_PAGINATE_PARAMS: 'InvalidPaginateParamsError'
 }
 
 export const SEQUELIZE_ERRORS = {
