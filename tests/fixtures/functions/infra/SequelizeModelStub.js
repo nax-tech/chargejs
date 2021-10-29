@@ -36,8 +36,8 @@ export default {
     }
   },
   sequalize: {
-    models: [
-      {
+    models: {
+      ModelName: {
         tableName: 'ModelName',
         options: {
           name: {
@@ -50,7 +50,7 @@ export default {
           ]
         }
       },
-      {
+      Other: {
         tableName: 'Other',
         options: {
           name: {
@@ -61,7 +61,7 @@ export default {
           ]
         }
       }
-    ]
+    }
   },
   findOne () {
     return true
