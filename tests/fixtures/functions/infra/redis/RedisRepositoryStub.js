@@ -14,10 +14,10 @@ export default {
   create (obj) {
     return obj
   },
-  delete () {
+  clear () {
     return true
   },
-  clearRelated () {
+  clearReferenced () {
     return true
   }
 }

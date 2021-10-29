@@ -1,5 +1,5 @@
 import { get } from 'dot-get'
-import { isEqual, unionWith } from 'lodash'
+import isEqual from 'lodash/isEqual'
 import { REDIS_REPOSITORY_INITIALIZED, INVALID_FILTER, INVALID_FILTER_VALUE } from '../../errors'
 
 /**
@@ -71,33 +71,40 @@ class RedisRepository {
     return object
   }
 
-  delete ({ id }) {
-    return this._delete(this.modelName, id)
-  }
-
-  async clearRelated (object, skipReferenced = false) {
-    const related = await this._getRelated(object, skipReferenced)
-    if (related.length) {
-      return Promise.all(
-        related.map(({ modelName, id }) => {
-          return this._delete(modelName, id)
-        })
+  async clearReferenced (object) {
+    const references = this.references.map(({ modelName, fieldName }) => ({
+      modelName,
+      id: object[fieldName]
+    })).filter(r => r.id)
+    if (references.length) {
+      await Promise.all(
+        references.map(({ modelName, id }) => this._clear(modelName, id))
       )
     }
   }
 
-  async _getRelated (object, skipReferenced) {
-    const relations = this.references.map(({ modelName, fieldName }) => ({
-      modelName,
-      id: object[fieldName]
-    })).filter(r => r.id)
-    if (skipReferenced) {
-      return relations
+  clear ({ id }, relationsOnly) {
+    return this._clear(this.modelName, id, relationsOnly)
+  }
+
+  _clear (modelName, id, relationsOnly) {
+    return Promise.all([
+      !relationsOnly ? this._clearObject(this.modelName, id) : null,
+      this._clearRelated(modelName, id)
+    ].filter(Boolean))
+  }
+
+  async _clearRelated (modelName, id) {
+    const key = this._buildRelationsKey(modelName, id)
+    const related = await this.redisStorage.getList(key)
+    await this._clearList(key, related)
+    if (related.length) {
+      await Promise.all(
+        related.map(({ modelName, id }) => {
+          return this._deleteObject(modelName, id)
+        })
+      )
     }
-    const key = this._buildRelationsKey(this.modelName, object.id)
-    const storedRelations = await this.redisStorage.getList(key)
-    await this._clearList(key, storedRelations)
-    return unionWith(relations, storedRelations, isEqual)
   }
 
   _normalizeIndexes (indexes) {
@@ -106,7 +113,7 @@ class RedisRepository {
       .map(fields => fields.sort())
   }
 
-  async _delete (modelName, id) {
+  async _clearObject (modelName, id) {
     const object = await this._getById(modelName, id)
     if (object) {
       const key = this._buildIdKey(modelName, id)
@@ -171,7 +178,7 @@ class RedisRepository {
   async _pushToList (key, object) {
     await this.redisStorage.listPush(key, object)
     this.transactionProvider.addRedisRollback(
-      async () => this.redisStorage.listRemove(key, object)
+      () => this.redisStorage.listRemove(key, object)
     )
   }
 

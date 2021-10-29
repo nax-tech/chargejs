@@ -10,18 +10,23 @@ class TransactionProvider {
   }
 
   async useTransaction (action) {
+    // Check for cases when useTransaction is called inside useTransaction,
+    // so only outer transaction wrapping should commit changes
+    if (this.current) {
+      return action()
+    }
     try {
-      await this.transaction()
+      await this._transaction()
       const response = await action()
-      await this.commit()
+      await this._commit()
       return response
     } catch (error) {
-      await this.rollback()
+      await this._rollback()
       throw error
     }
   }
 
-  async transaction () {
+  async _transaction () {
     if (!this.current) {
       const transaction = new this.Transaction(this.database)
       this.current = await transaction.begin()
@@ -29,12 +34,12 @@ class TransactionProvider {
     return this.current
   }
 
-  async commit () {
+  async _commit () {
     await this.current.commit()
     this.current = undefined
   }
 
-  async rollback () {
+  async _rollback () {
     await this.current.rollback()
     this.current = undefined
   }

@@ -194,7 +194,7 @@ class BaseRepository {
       { transaction: this._getTransaction() }
     )
     const json = dbEntry.toJSON()
-    await this._clearCache(json, true)
+    await this.redisRepository.clearReferenced(json)
     return this.mapper.toEntity(json)
   }
 
@@ -348,11 +348,8 @@ class BaseRepository {
     }
   }
 
-  async _clearCache (entity, skipReferenced = false) {
-    if (!this.cacheDisabled && !skipReferenced) {
-      await this.redisRepository.delete(entity)
-    }
-    await this.redisRepository.clearRelated(entity, skipReferenced)
+  _clearCache (entity) {
+    return this.redisRepository.clear(entity, this.cacheDisabled)
   }
 
   async _getPatchFilter (where) {
