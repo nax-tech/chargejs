@@ -55,10 +55,12 @@
     "http-status": "^1.4.2",
     "https": "^1.0.0",
     "lodash": "^4.17.20",
+    "paginate-info": "^1.0.4",
     "structure": "^2.0.1",
     "winston": "^3.2.1"
   },
   "peerDependencies": {
+    "awilix": "^5.0.1",
     "awilix-express": "^5.0.0"
   },
   "directories": {
