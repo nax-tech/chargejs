@@ -30,14 +30,15 @@ class BaseRepository {
     redisRepository,
     calculateLimitAndOffset,
     paginate,
-    config: { logmsg },
+    config,
     standardError
   }) {
     this.transactionProvider = transactionProvider
     this.redisRepository = redisRepository
     this.calculateLimitAndOffset = calculateLimitAndOffset
     this.paginate = paginate
-    this.logmsg = logmsg
+    this.config = config
+    this.logmsg = config.logmsg
     this.standardError = standardError
   }
 
@@ -55,7 +56,7 @@ class BaseRepository {
     model,
     mapper,
     patchAllowedFields = undefined,
-    include = [],
+    include = undefined,
     cacheDisabled = false
   }) {
     this.modelName = this._getModelName(model)
@@ -118,19 +119,58 @@ class BaseRepository {
   }
 
   /**
+   * Сount entities by filter
+   *
+   * @param {Object} where filter
+   * @param {Object} [options] additional sequelize options
+   * @returns {Promise<Number>} number of entities
+   */
+  count (where, options) {
+    return this.model.count({
+      ...options,
+      where,
+      include: this.include,
+      transaction: this._getTransaction()
+    })
+  }
+
+  /**
+   * Returns latest entry
+   *
+   * @param {Object} [where] filter
+   * @param {Object} [options] additional sequelize options
+   * @param {String} [options.orderBy] order field
+   * @returns {Promise<Object>} entity
+   * @throws {module:interface.standardError}
+   */
+  async findLatest (where = undefined, { rejectOnEmpty = true, ...opts } = {}) {
+    const [result] = await this.findAll(where, {
+      limit: 1,
+      ...opts
+    })
+    if (result) {
+      return result
+    }
+    if (rejectOnEmpty) {
+      throw this._getNotFoundError()
+    }
+  }
+
+  /**
    * Finds entities by filter
    *
    * @param {Object} where filter
    * @param {Object} [options] additional sequelize options
+   * @param {String} [options.orderBy] order field
    * @returns {Promise<Object[]>} entities
    * @throws {module:interface.standardError}
    */
-  async findAll (where, options = {}) {
+  async findAll (where, { orderBy = 'createdAt', ...opts } = {}) {
     this._validateFilter(where)
 
     const rows = await this.model.findAll({
-      order: [['createdAt', 'DESC']],
-      ...options,
+      order: [[orderBy, 'DESC']],
+      ...opts,
       where,
       include: this.include,
       transaction: this._getTransaction()
@@ -150,18 +190,19 @@ class BaseRepository {
    * @param {number} currentPage current page number
    * @param {number} pageSize page size
    * @param {Object} [options] additional sequelize options
+   * @param {String} [options.orderBy] order field
    * @returns {Promise<{ data: Object[], meta: Meta>} entities
    * @throws {module:interface.standardError}
    */
-  async findAndCountAll (where, currentPage, pageSize, options = {}) {
+  async findAndCountAll (where, currentPage, pageSize, { orderBy = 'createdAt', ...opts } = {}) {
     this._validateFilter(where)
     this._validatePaginateParams(currentPage, pageSize)
 
     const { limit, offset } = this.calculateLimitAndOffset(currentPage, pageSize)
 
     const { rows, count } = await this.model.findAndCountAll({
-      order: [['createdAt', 'DESC']],
-      ...options,
+      order: [[orderBy, 'DESC']],
+      ...opts,
       limit,
       offset,
       distinct: true,
@@ -202,11 +243,12 @@ class BaseRepository {
    *
    * @param {string} id entity uuid
    * @param {Object} updateFields the fields to be updated
+   * @param {boolean} [filterFields=true] should filter updateFields
    * @returns {Promise<module:domain.BaseDomain>} updated domain entity
    * @throws {module:interface.standardError}
    */
-  async patchById (id, updateFields) {
-    return this.patch({ id }, updateFields)
+  async patchById (id, updateFields, filterFields = true) {
+    return this.patch({ id }, updateFields, filterFields)
   }
 
   /**
@@ -214,13 +256,14 @@ class BaseRepository {
    *
    * @param {Object} where filter
    * @param {Object} updateFields the fields to be updated
+   * @param {boolean} [filterFields=true] should filter updateFields
    * @returns {Promise<module:domain.BaseDomain>} updated domain entity
    * @throws {module:interface.standardError}
    */
-  async patch (where, updateFields) {
+  async patch (where, updateFields, filterFields = true) {
     this._validateFilter(where)
 
-    const filteredFields = this._filterPatchFields(updateFields)
+    const filteredFields = filterFields ? this._filterPatchFields(updateFields) : updateFields
     try {
       const filter = await this._getPatchFilter(where)
       const [, result] = await this.model.update(filteredFields, {
@@ -313,6 +356,9 @@ class BaseRepository {
   }
 
   _normalizeInclude (include) {
+    if (!include) {
+      return []
+    }
     return include.map(({ model, as, include }) => ({
       modelName: this._getModelName(model),
       as,

@@ -3,13 +3,7 @@ import { calculateLimitAndOffset, paginate } from 'paginate-info'
 import { Transaction, TransactionProvider } from './transaction'
 import { RedisRepository, RedisStorage, redis } from './redis'
 
-export { Transaction, TransactionProvider }
-export { RedisRepository, RedisStorage, redis }
-export { default as BaseRepository } from './BaseRepository'
-export { default as LoggerStreamAdapter } from './LoggerStreamAdapter'
-export { default as ModelLoader } from './ModelLoader'
-
-export function register (container, repositories) {
+function register (container, repositories) {
   container.register({
     calculateLimitAndOffset: asValue(calculateLimitAndOffset),
     paginate: asValue(paginate),
@@ -19,14 +13,23 @@ export function register (container, repositories) {
     Transaction: asValue(Transaction),
     transactionProvider: asClass(TransactionProvider).scoped()
   })
-  container.register(Object.fromEntries(
-    Object.entries(repositories).map(([name, repository]) => [
-      _lovercaseName(name),
-      asClass(repository).scoped()
-    ])
-  ))
+  container.register(
+    Object.fromEntries(
+      Object.entries(repositories).map(([name, repository]) => [
+        lowerСaseName(name),
+        asClass(repository).scoped()
+      ])
+    )
+  )
 }
 
-function _lovercaseName (name) {
+function lowerСaseName (name) {
   return name.charAt(0).toLowerCase() + name.slice(1)
 }
+
+export { register }
+export { Transaction, TransactionProvider }
+export { RedisRepository, RedisStorage, redis }
+export { default as BaseRepository } from './BaseRepository'
+export { default as LoggerStreamAdapter } from './LoggerStreamAdapter'
+export { default as ModelLoader } from './ModelLoader'
