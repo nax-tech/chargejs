@@ -334,12 +334,6 @@ class BaseRepository {
   }
 
   _validatePaginateParams (currentPage, pageSize) {
-    console.log({
-      _validatePaginateParams: {
-        currentPage,
-        pageSize
-      }
-    })
     if (Number.isNaN(Number(currentPage))) {
       // Error for developers only, can only occur if the currentPage is invalid
       const error = new Error(INVALID_CURRENT_PAGE.message)
