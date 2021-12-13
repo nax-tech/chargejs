@@ -129,6 +129,20 @@ export const redisConf = (config, env, app) => {
 }
 
 /**
+ * Wrap message meta into object if it's not
+ */
+const metaFormatter = winston.format((info) => {
+  if(info && info.message && info.message.meta) {
+    if(typeof info.message.meta !== 'object') {
+      info.message.meta = {
+        value: info.message.meta
+      };
+    }
+  }
+  return info;
+});
+
+/**
  * Get the Winston configuration object https://github.com/winstonjs/winston#readme
  * @memberof module:config
  * @method
@@ -140,6 +154,7 @@ export const logging = (env, app) => {
   return {
     level: env === 'production' ? 'info' : 'debug',
     format: winston.format.combine(
+      metaFormatter(),
       winston.format.label({
         label: path.basename(process.mainModule.filename)
       }),
