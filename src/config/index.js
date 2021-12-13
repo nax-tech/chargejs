@@ -132,15 +132,15 @@ export const redisConf = (config, env, app) => {
  * Wrap message meta into object if it's not
  */
 const metaFormatter = winston.format((info) => {
-  if(info && info.message && info.message.meta) {
-    if(typeof info.message.meta !== 'object') {
+  if (info && info.message && info.message.meta) {
+    if (typeof info.message.meta !== 'object') {
       info.message.meta = {
         value: info.message.meta
-      };
+      }
     }
   }
-  return info;
-});
+  return info
+})
 
 /**
  * Get the Winston configuration object https://github.com/winstonjs/winston#readme
