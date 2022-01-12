@@ -132,8 +132,11 @@ export const redisConf = (config, env, app) => {
  * Wrap message meta into object if it's not
  */
 const metaFormatter = winston.format((info) => {
-  if (info && info.message && info.message.meta) {
-    if (typeof info.message.meta !== 'object') {
+  if (info && info.message) {
+    const { meta } = info.message
+    if (!meta) {
+      info.message.meta = {}
+    } else if (typeof meta !== 'object' || Array.isArray(meta)) {
       info.message.meta = {
         value: info.message.meta
       }
