@@ -114,12 +114,12 @@ export const NOTIFICATION_PUSH_TEXT = {
     },
     PIN: {
       ENABLED: {
-        TITLE: 'Touch ID & PIN Enabled',
-        BODY: 'Touch ID & PIN has successfully been enabled!'
+        TITLE: 'Touch/Face ID Enabled',
+        BODY: 'Touch/Face ID has successfully been enabled!'
       },
       DISABLED: {
-        TITLE: 'Touch ID & PIN Disabled',
-        BODY: 'Touch ID & PIN has successfully been disabled!'
+        TITLE: 'Touch/Face ID Disabled',
+        BODY: 'Touch/Face ID has successfully been disabled!'
       },
       UPDATED: {
         TITLE: 'PIN Code Updated',

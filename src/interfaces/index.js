@@ -114,6 +114,7 @@ export const devErrorHandler = (err, req, res, next) => {
  */
 export const deviceMiddleware = (req, res, next) => {
   const userAgentHeader = req.headers['user-agent']
+  const detector = new DeviceDetector()
 
   if (!userAgentHeader) {
     res.status(Status.BAD_REQUEST).send({
@@ -124,11 +125,13 @@ export const deviceMiddleware = (req, res, next) => {
     })
   }
 
-  req.origin.device = new DeviceDetector().detect(userAgentHeader)
-  req.origin.client = {
-    xForwardedFor: req.headers['X-Forwarded-For'],
-    xForwardedProto: req.headers['X-Forwarded-Proto'],
-    xForwardedPort: req.headers['X-Forwarded-Port']
+  req.origin = {
+    device: detector.detect(userAgentHeader),
+    client: {
+      xForwardedFor: req.headers['X-Forwarded-For'],
+      xForwardedProto: req.headers['X-Forwarded-Proto'],
+      xForwardedPort: req.headers['X-Forwarded-Port']
+    }
   }
 
   next()
