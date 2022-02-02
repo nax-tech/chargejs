@@ -1,3 +1,4 @@
+import ret from 'bluebird/js/release/util'
 import { get } from 'dot-get'
 import isEqual from 'lodash/isEqual'
 import { REDIS_REPOSITORY_INITIALIZED, INVALID_FILTER, INVALID_FILTER_VALUE } from '../../errors'
@@ -108,9 +109,12 @@ class RedisRepository {
   }
 
   _normalizeIndexes (indexes) {
-    return indexes
-      .filter(fields => !fields.includes('id'))
-      .map(fields => fields.sort())
+    return Object.fromEntries(
+      Object.entries(indexes).map(([ modelName, index ]) => [
+        modelName,
+        index.filter(fields => !fields.includes('id')).map(fields => fields.sort()) 
+      ])
+    )
   }
 
   async _clearObject (modelName, id) {
