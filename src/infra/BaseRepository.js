@@ -342,7 +342,7 @@ class BaseRepository {
   }
 
   _getReferences (model) {
-    const models = Object.values(model.sequalize.models)
+    const models = Object.values(model.sequelize.models)
     return Object.values(model.rawAttributes)
       .filter(({ references }) => references && references.key === 'id')
       .map(attr => {
@@ -367,7 +367,7 @@ class BaseRepository {
   }
 
   _getIndexes (model) {
-    const models = Object.values(model.sequalize.models)
+    const models = Object.values(model.sequelize.models)
     const entries = models.map(model => {
       const modelName = this._getModelName(model)
       const indexes = (model.options.indexes || [])

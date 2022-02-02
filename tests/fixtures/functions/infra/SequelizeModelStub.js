@@ -35,7 +35,7 @@ export default {
       field: 'otherId'
     }
   },
-  sequalize: {
+  sequelize: {
     models: {
       ModelName: {
         tableName: 'ModelName',
