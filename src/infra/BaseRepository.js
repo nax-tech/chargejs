@@ -143,7 +143,7 @@ class BaseRepository {
    * @returns {Promise<Object>} entity
    * @throws {module:interface.standardError}
    */
-  async findLatest (where = undefined, { rejectOnEmpty = true, ...opts } = {}) {
+  async findLatest (where = {}, { rejectOnEmpty = true, ...opts } = {}) {
     const [result] = await this.findAll(where, {
       limit: 1,
       ...opts
