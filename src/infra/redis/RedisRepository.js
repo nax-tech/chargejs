@@ -196,7 +196,7 @@ class RedisRepository {
   async _clearList (key, values) {
     await this.redisStorage.listClear(key)
     this.transactionProvider.addRedisRollback(
-      () => this.redisStorage.pushToList(key, ...values)
+      () => this.redisStorage.listPush(key, ...values)
     )
   }
 
