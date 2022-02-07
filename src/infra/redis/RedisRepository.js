@@ -98,8 +98,8 @@ class RedisRepository {
   async _clearRelated (modelName, id) {
     const key = this._buildRelationsKey(modelName, id)
     const related = await this.redisStorage.getList(key)
-    await this._clearList(key, related)
     if (related.length) {
+      await this._clearList(key, related)
       await Promise.all(
         related.map(({ modelName, id }) => {
           return this._deleteObject(modelName, id)
