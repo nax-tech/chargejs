@@ -5,7 +5,8 @@ import {
   SEQUELIZE_NOT_FOUNT_ERROR,
   SEQUELIZE_VALIDATION_ERROR,
   INVALID_PAGE_SIZE,
-  INVALID_CURRENT_PAGE
+  INVALID_CURRENT_PAGE,
+  EMPTY_UPDATE_FIELDS
 } from '../errors'
 
 /**
@@ -264,6 +265,12 @@ class BaseRepository {
     this._validateFilter(where)
 
     const filteredFields = filterFields ? this._filterPatchFields(updateFields) : updateFields
+    if (!Object.keys(filteredFields).length) {
+      throw this._getValidationError([{
+        message: EMPTY_UPDATE_FIELDS.message,
+        path: 'updateFields'
+      }])
+    }
     try {
       const filter = await this._getPatchFilter(where)
       const [, result] = await this.model.update(filteredFields, {

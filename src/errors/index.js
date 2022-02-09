@@ -38,6 +38,11 @@ export const INVALID_FILTER_TYPE = {
   code: ERROR_TYPES.INVALID_FILTER_TYPE
 }
 
+export const EMPTY_UPDATE_FIELDS = {
+  message: 'No fileds to update',
+  code: ERROR_TYPES.EMPTY_UPDATE_FIELDS
+}
+
 export const INVALID_CURRENT_PAGE = {
   message: 'currentPage parameter should be a valid number',
   code: ERROR_TYPES.INVALID_PAGINATE_PARAMS
