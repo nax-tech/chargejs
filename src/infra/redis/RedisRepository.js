@@ -62,11 +62,11 @@ class RedisRepository {
 
   async create (object) {
     const idKey = this._buildIdKey(this.modelName, object.id)
-    await this._saveObject(idKey, object)
+    await this._saveRow(idKey, object)
     const cacheKeys = this._getObjectCacheKeys(this.modelName, object)
     await Promise.all([
       this._storeIncluded(object),
-      ...cacheKeys.map(key => this._saveObject(key, object.id))
+      ...cacheKeys.map(key => this._saveRow(key, object.id))
     ])
     return object
   }
@@ -83,15 +83,18 @@ class RedisRepository {
     }
   }
 
-  clear ({ id }, relationsOnly) {
+  clear ({ id }, relationsOnly = false) {
     return this._clear(this.modelName, id, relationsOnly)
   }
 
-  _clear (modelName, id, relationsOnly) {
-    return Promise.all([
-      !relationsOnly ? this._clearObject(this.modelName, id) : null,
+  _clear (modelName, id, relationsOnly = false) {
+    const promises = [
       this._clearRelated(modelName, id)
-    ].filter(Boolean))
+    ]
+    if (!relationsOnly) {
+      promises.unshift(this._clearObject(modelName, id))
+    }
+    return Promise.all(promises)
   }
 
   async _clearRelated (modelName, id) {
@@ -120,11 +123,11 @@ class RedisRepository {
     const object = await this._getById(modelName, id)
     if (object) {
       const key = this._buildIdKey(modelName, id)
-      await this._deleteObject(key, object)
+      await this._deleteRow(key, object)
       const cacheKeys = this._getObjectCacheKeys(modelName, object)
       if (cacheKeys.length) {
         await Promise.all(cacheKeys.map(
-          key => this._deleteObject(key, id)
+          key => this._deleteRow(key, id)
         ))
       }
     }
@@ -148,7 +151,7 @@ class RedisRepository {
   }
 
   _getIncluded (entity, include) {
-    const result = include.reduce((result, { modelName, as, include }) => {
+    return include.reduce((result, { modelName, as, include }) => {
       const related = entity[as]
       if (related) {
         const relatedArray = Array.isArray(related) ? related : [related]
@@ -164,8 +167,6 @@ class RedisRepository {
       }
       return result
     }, [])
-    console.log('\n', entity.object, 'INCLUDED:', result)
-    return result
   }
 
   _getById (modelName, id) {
@@ -187,7 +188,7 @@ class RedisRepository {
     )
   }
 
-  async _saveObject (key, object) {
+  async _saveRow (key, object) {
     await this.redisStorage.saveObject(key, object)
     this.transactionProvider.addRedisRollback(
       () => this.redisStorage.deleteObject(key)
@@ -201,7 +202,7 @@ class RedisRepository {
     )
   }
 
-  async _deleteObject (key, object) {
+  async _deleteRow (key, object) {
     await this.redisStorage.deleteObject(key)
     this.transactionProvider.addRedisRollback(
       () => this.redisStorage.saveObject(key, object)
