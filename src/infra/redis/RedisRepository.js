@@ -149,7 +149,7 @@ class RedisRepository {
   }
 
   _getIncluded (entity, include) {
-    return include.reduce((result, { modelName, as, include }) => {
+    const result = include.reduce((result, { modelName, as, include }) => {
       const related = entity[as]
       if (related) {
         const relatedArray = Array.isArray(related) ? related : [related]
@@ -165,6 +165,8 @@ class RedisRepository {
       }
       return result
     }, [])
+    console.log('INCLUDED:', result)
+    return result
   }
 
   _getById (modelName, id) {
