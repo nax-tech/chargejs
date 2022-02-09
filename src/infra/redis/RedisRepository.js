@@ -1,4 +1,3 @@
-import ret from 'bluebird/js/release/util'
 import { get } from 'dot-get'
 import isEqual from 'lodash/isEqual'
 import { REDIS_REPOSITORY_INITIALIZED, INVALID_FILTER, INVALID_FILTER_VALUE } from '../../errors'
@@ -65,10 +64,10 @@ class RedisRepository {
     const idKey = this._buildIdKey(this.modelName, object.id)
     await this._saveObject(idKey, object)
     const cacheKeys = this._getObjectCacheKeys(this.modelName, object)
-    await Promise.all(cacheKeys.map(
-      key => this._saveObject(key, object.id)
-    ))
-    await this._storeIncluded(object)
+    await Promise.all([
+      this._storeIncluded(object),
+      ...cacheKeys.map(key => this._saveObject(key, object.id))
+    ])
     return object
   }
 
@@ -99,20 +98,20 @@ class RedisRepository {
     const key = this._buildRelationsKey(modelName, id)
     const related = await this.redisStorage.getList(key)
     if (related.length) {
-      await this._clearList(key, related)
-      await Promise.all(
-        related.map(({ modelName, id }) => {
-          return this._deleteObject(modelName, id)
+      await Promise.all([
+        this._clearList(key, related),
+        ...related.map(({ modelName, id }) => {
+          return this._clearObject(modelName, id)
         })
-      )
+      ])
     }
   }
 
   _normalizeIndexes (indexes) {
     return Object.fromEntries(
-      Object.entries(indexes).map(([ modelName, index ]) => [
+      Object.entries(indexes).map(([modelName, index]) => [
         modelName,
-        index.filter(fields => !fields.includes('id')).map(fields => fields.sort()) 
+        index.filter(fields => !fields.includes('id')).map(fields => fields.sort())
       ])
     )
   }
@@ -165,7 +164,7 @@ class RedisRepository {
       }
       return result
     }, [])
-    console.log('INCLUDED:', result)
+    console.log('\n', entity.object, 'INCLUDED:', result)
     return result
   }
 
