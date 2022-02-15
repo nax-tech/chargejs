@@ -10,7 +10,7 @@ export class ServiceCommunicator {
     this.logmsg = config.logmsg
   }
 
-  async _http (options) {
+  async http (options) {
     try {
       const response = await axios(options)
       return response.data
