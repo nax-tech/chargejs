@@ -10,9 +10,16 @@ export class ServiceCommunicator {
     this.logmsg = config.logmsg
   }
 
+  init (serviceUrl) {
+    this.serviceUrl = serviceUrl
+  }
+
   async http (options) {
     try {
-      const response = await axios(options)
+      const response = await axios({
+        baseURL: this.serviceUrl,
+        ...options
+      })
       return response.data
     } catch (error) {
       const { response } = error
