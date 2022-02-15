@@ -45,6 +45,7 @@
     "standard": "^14.3.3"
   },
   "dependencies": {
+    "axios": "^0.26.0",
     "bluebird": "^3.7.2",
     "dot-get": "^1.0.1",
     "ein-validator": "^1.0.0",
