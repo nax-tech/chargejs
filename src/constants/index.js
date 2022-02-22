@@ -75,8 +75,8 @@ export const NOTIFICATION_PUSH_TEXT = {
       BODY: 'You have declined a payment from'
     },
     FAILED: {
-      TITLE: 'Payment Failed',
-      BODY: 'Your payment failed'
+      TITLE: 'New Payment Card Failed',
+      BODY: 'Activating new payment card from {companyName} failed'
     }
   },
   PROFILE: {
