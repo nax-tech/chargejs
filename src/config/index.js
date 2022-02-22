@@ -457,7 +457,13 @@ export const createNotifications = (settingsId) => {
       settingsId,
       kind: NOTIFICATION_KIND.push,
       sourceType: NOTIFICATION_SOURCE_TYPES.transactions,
-      type: NOTIFICATION_TYPES.new
+      type: NOTIFICATION_TYPES.accepted
+    },
+    {
+      settingsId,
+      kind: NOTIFICATION_KIND.push,
+      sourceType: NOTIFICATION_SOURCE_TYPES.transactions,
+      type: NOTIFICATION_TYPES.declined
     }
   ]
 }
