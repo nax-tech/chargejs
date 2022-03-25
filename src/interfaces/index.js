@@ -7,6 +7,8 @@ import { validationResult } from 'express-validator'
 import { makeInvoker } from 'awilix-express'
 import DeviceDetector from 'node-device-detector'
 
+export { ServiceCommunicator } from './ServiceCommunicator'
+
 /**
  * A module for common interfaces
  * @module interface
