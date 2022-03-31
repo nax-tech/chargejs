@@ -319,17 +319,17 @@ export const NOTIFICATION_PUSH = {
  */
 export const VALIDATION = {
   regex: {
-    email: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/g,
-    name: /^[A-Za-z\- .]+$/g,
-    specialChar: /\W/g,
-    printableChars: /^[A-Za-z0-9 <>@!#$%&'*+-/=?^_`(){|}~[\]\\:;,./<>?"]+$/g,
-    accountName: /^[A-Za-z0-9 ]+$/g,
-    businessName: /^[A-Za-z0-9 .`~!@#$%^&*()_:";'{}[\]+<>?,/]+$/g,
-    street: /^[A-Za-z0-9 .]+$/g,
-    city: /[A-Za-z .]+$/g,
-    stateCode: /^[A-Za-z]+$/g,
+    email: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+    name: /^[A-Za-z\- .]+$/,
+    specialChar: /\W/,
+    printableChars: /^[A-Za-z0-9 <>@!#$%&'*+-/=?^_`(){|}~[\]\\:;,./<>?"]+$/,
+    accountName: /^[A-Za-z0-9 ]+$/,
+    businessName: /^[A-Za-z0-9 .`~!@#$%^&*()_:";'{}[\]+<>?,/]+$/,
+    street: /^[A-Za-z0-9 .]+$/,
+    city: /[A-Za-z .]+$/,
+    stateCode: /^[A-Za-z]+$/,
     countryCode: /^US$/,
-    zip: /(^\d{5}$)|(^\d{5}-\d{4}$)/g
+    zip: /(^\d{5}$)|(^\d{5}-\d{4}$)/
   }
 }
 
