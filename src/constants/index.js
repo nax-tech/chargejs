@@ -137,6 +137,11 @@ export const EVENTS = {
 }
 
 export const ERROR_TYPES = {
+  NOT_FOUND: 'NotFoundError',
+  VALIDATION_ERROR: 'ValidationError',
+  CONFLICT: 'ConflictError',
+  UNAUTHORIZED: 'UnauthorizedError',
+  UNCONFIRMED: 'UnconfirmedError',
   INVALID_PATCH_FIELDS: 'InvalidPatchAllowedFieldsError',
   REDIS_REPOSITORY_INITIALIZED: 'RedisRepositoryAlreadyInitializedError',
   CACHE_DISABLED: 'CacheDisabledError',

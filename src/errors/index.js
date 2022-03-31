@@ -7,6 +7,16 @@ import {
   SEQUELIZE_ERRORS
 } from '../constants'
 
+export const NOT_FOUND = {
+  message: 'Not found',
+  code: ERROR_TYPES.NOT_FOUND
+}
+
+export const VALIDATION_ERROR = {
+  message: 'Validation error',
+  code: ERROR_TYPES.VALIDATION_ERROR
+}
+
 export const INVALID_ENV = {
   message: `Invalid environment. Allowed values ${ALLOWED_ENVIRONMENTS}`,
   code: CODES.INVALID_ENV
