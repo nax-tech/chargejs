@@ -312,6 +312,27 @@ export const NOTIFICATION_PUSH = {
     }
   }
 }
+
+/**
+ * The validation rules
+ * @memberof module:config
+ */
+export const VALIDATION = {
+  regex: {
+    email: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/g,
+    name: /^[A-Za-z\- .]+$/g,
+    specialChar: /\W/g,
+    printableChars: /^[A-Za-z0-9 <>@!#$%&'*+-/=?^_`(){|}~[\]\\:;,./<>?"]+$/g,
+    accountName: /^[A-Za-z0-9 ]+$/g,
+    businessName: /^[A-Za-z0-9 .`~!@#$%^&*()_:";'{}[\]+<>?,/]+$/g,
+    street: /^[A-Za-z0-9 .]+$/g,
+    city: /[A-Za-z .]+$/g,
+    stateCode: /^[A-Za-z]+$/g,
+    countryCode: /^US$/,
+    zip: /(^\d{5}$)|(^\d{5}-\d{4}$)/g
+  }
+}
+
 /**
  * Creates the initial notification array for a new user
  * @memberof module:config
