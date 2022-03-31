@@ -1,4 +1,6 @@
 import {
+  NOT_FOUND,
+  VALIDATION_ERROR,
   INVALID_PATCH_FIELDS,
   INVALID_FILTER_TYPE,
   CACHE_DISABLED,
@@ -465,7 +467,7 @@ class BaseRepository {
   _getNotFoundError () {
     const errorMessage = this._notFoundErrorMessage()
     return this.standardError({
-      type: this.logmsg.errors.notFoundError,
+      type: NOT_FOUND.code,
       message: errorMessage,
       errors: [
         {
@@ -480,7 +482,7 @@ class BaseRepository {
   _getValidationError (errors) {
     const errorMessage = this._validationErrorMessage()
     return this.standardError({
-      type: this.logmsg.errors.validationError,
+      type: VALIDATION_ERROR.code,
       message: errorMessage,
       errors: errors.map((error) => ({
         param: this.modelName,
@@ -495,15 +497,13 @@ class BaseRepository {
   }
 
   _notFoundErrorMessage () {
-    const modelMessages = this.logmsg.info[this.modelName] || {}
     const name = this._getCapitalizedModelName()
-    return modelMessages.notFoundError || `${name} not found`
+    return `${name} ${NOT_FOUND.message}`
   }
 
   _validationErrorMessage () {
-    const modelMessages = this.logmsg.info[this.modelName] || {}
     const name = this._getCapitalizedModelName()
-    return modelMessages.validationError || `Invalid ${name} field data`
+    return `${name} ${VALIDATION_ERROR.message}`
   }
 
   _getCacheDisabledError () {
