@@ -3,6 +3,7 @@ Object.defineProperty(exports, '__esModule', {
 })
 
 module.exports = {
+  constants: require('./constants'),
   config: require('./config'),
   app: require('./app'),
   domain: require('./domain'),
