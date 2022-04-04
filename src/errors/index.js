@@ -17,6 +17,11 @@ export const VALIDATION_ERROR = {
   code: ERROR_TYPES.VALIDATION_ERROR
 }
 
+export const CONFLICT_ERROR = {
+  message: 'Conflict error',
+  code: ERROR_TYPES.CONFLICT
+}
+
 export const INVALID_ENV = {
   message: `Invalid environment. Allowed values ${ALLOWED_ENVIRONMENTS}`,
   code: CODES.INVALID_ENV

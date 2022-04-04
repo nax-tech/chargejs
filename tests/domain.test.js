@@ -14,7 +14,6 @@ describe('domain', function () {
     it('it set meta correctly', function () {
       const meta = 'test'
       base.setMeta(meta)
-      console.log(base.meta)
       assert.deepStrictEqual(base.meta, meta)
     })
     it('it should set masked correctly', function () {

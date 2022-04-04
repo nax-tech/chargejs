@@ -1,5 +1,6 @@
 import axios from 'axios'
 import Status from 'http-status'
+import { NOT_FOUND, VALIDATION_ERROR, CONFLICT_ERROR } from '../errors'
 
 export class ServiceCommunicator {
   constructor ({
@@ -31,7 +32,7 @@ export class ServiceCommunicator {
   }
 
   _getStandardError (error) {
-    const type = this._getErrorType(error.type)
+    const type = this._getErrorCode(error.type)
     const { message, errors = [] } = error
     return this.standardError({
       type,
@@ -44,12 +45,14 @@ export class ServiceCommunicator {
     })
   }
 
-  _getErrorType (type) {
+  _getErrorCode (type) {
     switch (type) {
       case Status['400_NAME']:
-        return this.logmsg.errors.validationError
+        return VALIDATION_ERROR.code
       case Status['404_NAME']:
-        return this.logmsg.errors.notFoundError
+        return NOT_FOUND.code
+      case Status['409_NAME']:
+        return CONFLICT_ERROR.code
       default:
         return type
     }
