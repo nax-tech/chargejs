@@ -324,7 +324,7 @@ export const VALIDATION = {
     specialChar: /\W/,
     printableChars: /^[A-Za-z0-9 <>@!#$%&'*+-/=?^_`(){|}~[\]\\:;,./<>?"]+$/,
     accountName: /^[A-Za-z0-9 ]+$/,
-    businessName: /^[A-Za-z0-9 .`~!@#$%^&*()_:";'{}[\]+<>?,/]+$/,
+    businessName: /^[A-Za-z0-9 .`~!@#$%^&*()_:";'{}\[\]+<>?,/]+$/,
     street: /^[A-Za-z0-9 .]+$/,
     city: /[A-Za-z .]+$/,
     stateCode: /^[A-Za-z]+$/,

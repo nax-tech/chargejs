@@ -321,14 +321,18 @@ class BaseRepository {
     this._validateFilter(where)
 
     try {
-      const filter = await this._getPatchFilter(where)
-      const [, result] = await this.model.destroy({
-        where: filter,
+      const result = await this.model.findOne({
+        where,
+        distinct: true,
         transaction: this._getTransaction()
       })
       if (!result) {
         throw this._getNotFoundError()
       }
+      await this.model.destroy({
+        where: filter,
+        transaction: this._getTransaction()
+      })
       const json = result.toJSON()
       await this._clearCache(json)
       return this.mapper.toEntity(json)

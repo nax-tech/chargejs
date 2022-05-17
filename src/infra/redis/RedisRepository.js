@@ -221,7 +221,7 @@ class RedisRepository {
         value,
         type: typeof value
       }))
-      const error = new Error(`${INVALID_FILTER_VALUE.message}: Invalid fields: ${fields}`)
+      const error = new Error(`${INVALID_FILTER_VALUE.message}: Invalid fields: ${JSON.stringify(fields)}`)
       error.type = INVALID_FILTER_VALUE.code
       throw error
     }
