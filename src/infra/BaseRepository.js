@@ -330,7 +330,7 @@ class BaseRepository {
         throw this._getNotFoundError()
       }
       await this.model.destroy({
-        where: filter,
+        where: { id: result.id },
         transaction: this._getTransaction()
       })
       const json = result.toJSON()
