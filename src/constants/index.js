@@ -24,6 +24,8 @@ export const CODES = {
 }
 
 export const SOURCE_TYPES = {
+  USER: 'user',
+  ISSUING_USER: 'issuingUser',
   EMAIL: 'email',
   PASSWORD: 'password',
   PHONE: 'phone',
@@ -36,6 +38,7 @@ export const SOURCE_TYPES = {
 }
 
 export const TYPES = {
+  WELCOME: 'welcome',
   DEFAULT: 'default',
   UPDATED: 'updated',
   ACCEPTED: 'accepted',
