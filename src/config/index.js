@@ -206,6 +206,8 @@ export const NOTIFICATION_KIND = {
  * @memberof module:config
  */
 export const NOTIFICATION_SOURCE_TYPES = {
+  user: SOURCE_TYPES.USER,
+  issuingUser: SOURCE_TYPES.ISSUING_USER,
   email: SOURCE_TYPES.EMAIL,
   password: SOURCE_TYPES.PASSWORD,
   phone: SOURCE_TYPES.PHONE,
@@ -223,6 +225,7 @@ export const NOTIFICATION_SOURCE_TYPES = {
  * @memberof module:config
  */
 export const NOTIFICATION_TYPES = {
+  welcome: TYPES.WELCOME,
   default: TYPES.DEFAULT,
   updated: TYPES.UPDATED,
   accepted: TYPES.ACCEPTED,
@@ -342,6 +345,12 @@ export const VALIDATION = {
  */
 export const createNotifications = (settingsId) => {
   return [
+    {
+      settingsId,
+      kind: NOTIFICATION_KIND.email,
+      sourceType: NOTIFICATION_SOURCE_TYPES.issuingUser,
+      type: NOTIFICATION_TYPES.welcome
+    },
     {
       settingsId,
       kind: NOTIFICATION_KIND.email,
