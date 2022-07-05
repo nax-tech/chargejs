@@ -17,6 +17,11 @@ export const VALIDATION_ERROR = {
   code: ERROR_TYPES.VALIDATION_ERROR
 }
 
+export const CONFLICT_ERROR = {
+  message: 'Conflict error',
+  code: ERROR_TYPES.CONFLICT
+}
+
 export const INVALID_ENV = {
   message: `Invalid environment. Allowed values ${ALLOWED_ENVIRONMENTS}`,
   code: CODES.INVALID_ENV
@@ -46,6 +51,11 @@ export const RETRY_REDIS = {
 export const INVALID_FILTER_TYPE = {
   message: 'Filter parameter should be of type object',
   code: ERROR_TYPES.INVALID_FILTER_TYPE
+}
+
+export const EMPTY_UPDATE_FIELDS = {
+  message: 'No fileds to update',
+  code: ERROR_TYPES.EMPTY_UPDATE_FIELDS
 }
 
 export const INVALID_CURRENT_PAGE = {

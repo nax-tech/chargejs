@@ -150,7 +150,8 @@ export const ERROR_TYPES = {
   CACHE_DISABLED: 'CacheDisabledError',
   INVALID_FILTER: 'InvalidFilterError',
   INVALID_FILTER_VALUE: 'InvalidFilterValueError',
-  INVALID_FILTER_TYPE: 'InvalidFIlterTypeError',
+  INVALID_FILTER_TYPE: 'InvalidFilterTypeError',
+  EMPTY_UPDATE_FIELDS: 'EmptyUpdateFields',
   INVALID_PAGINATE_PARAMS: 'InvalidPaginateParamsError'
 }
 

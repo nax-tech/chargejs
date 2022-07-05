@@ -7,7 +7,8 @@ import {
   SEQUELIZE_NOT_FOUNT_ERROR,
   SEQUELIZE_VALIDATION_ERROR,
   INVALID_PAGE_SIZE,
-  INVALID_CURRENT_PAGE
+  INVALID_CURRENT_PAGE,
+  EMPTY_UPDATE_FIELDS
 } from '../errors'
 
 /**
@@ -32,14 +33,15 @@ class BaseRepository {
     redisRepository,
     calculateLimitAndOffset,
     paginate,
-    config: { logmsg },
+    config,
     standardError
   }) {
     this.transactionProvider = transactionProvider
     this.redisRepository = redisRepository
     this.calculateLimitAndOffset = calculateLimitAndOffset
     this.paginate = paginate
-    this.logmsg = logmsg
+    this.config = config
+    this.logmsg = config.logmsg
     this.standardError = standardError
   }
 
@@ -47,7 +49,6 @@ class BaseRepository {
    * Provides configuration for BaseRepository.
    *
    * @param {Object} input The input object as injected in src/container.js
-   * @param {string} input.modelName The model name
    * @param {Object} input.model The db model
    * @param {Object} input.mapper The entity mapper
    * @param {string[]} [input.patchAllowedFields] The patch allowed fields array
@@ -55,22 +56,25 @@ class BaseRepository {
    * @param {boolean} [input.cacheDisabled=false] Disable cahing
    */
   init ({
-    modelName,
     model,
     mapper,
     patchAllowedFields = undefined,
     include = undefined,
     cacheDisabled = false
   }) {
-    this.modelName = modelName
+    this.modelName = this._getModelName(model)
     this.model = model
     this.mapper = mapper
     this.patchAllowedFields = patchAllowedFields
     this.include = include
     this.cacheDisabled = cacheDisabled
 
-    const indexes = !cacheDisabled ? model._indexes : []
-    this.redisRepository.init(modelName, indexes, include)
+    this.redisRepository.init({
+      modelName: this.modelName,
+      indexes: this._getIndexes(model),
+      include: this._normalizeInclude(include),
+      references: this._getReferences(model)
+    })
   }
 
   /**
@@ -118,24 +122,63 @@ class BaseRepository {
   }
 
   /**
-   * Finds entities by filter
+   * Сount entities by filter
    *
    * @param {Object} where filter
    * @param {Object} [options] additional sequelize options
-   * @returns {Promise<Object[]>} entities
-   * @throws {module:interface.standardError}
+   * @returns {Promise<Number>} number of entities
    */
-  async findAll (where, options = {}) {
-    this._validateFilter(where)
-
-    const results = await this.model.findAll({
-      order: [['createdAt', 'DESC']],
+  count (where, options) {
+    return this.model.count({
       ...options,
       where,
       include: this.include,
       transaction: this._getTransaction()
     })
-    return results.map((entry) => entry.toJSON())
+  }
+
+  /**
+   * Returns latest entry
+   *
+   * @param {Object} [where] filter
+   * @param {Object} [options] additional sequelize options
+   * @param {String} [options.orderBy] order field
+   * @returns {Promise<Object>} entity
+   * @throws {module:interface.standardError}
+   */
+  async findLatest (where = {}, { rejectOnEmpty = true, ...opts } = {}) {
+    const [result] = await this.findAll(where, {
+      limit: 1,
+      ...opts
+    })
+    if (result) {
+      return result
+    }
+    if (rejectOnEmpty) {
+      throw this._getNotFoundError()
+    }
+  }
+
+  /**
+   * Finds entities by filter
+   *
+   * @param {Object} where filter
+   * @param {Object} [options] additional sequelize options
+   * @param {String} [options.orderBy] order field
+   * @returns {Promise<Object[]>} entities
+   * @throws {module:interface.standardError}
+   */
+  async findAll (where, { orderBy = 'createdAt', ...opts } = {}) {
+    this._validateFilter(where)
+
+    const rows = await this.model.findAll({
+      order: [[orderBy, 'DESC']],
+      ...opts,
+      where,
+      include: this.include,
+      transaction: this._getTransaction()
+    })
+    return rows.map(row => this.mapper.toEntity(row.toJSON()))
   }
 
   /**
@@ -150,18 +193,19 @@ class BaseRepository {
    * @param {number} currentPage current page number
    * @param {number} pageSize page size
    * @param {Object} [options] additional sequelize options
+   * @param {String} [options.orderBy] order field
    * @returns {Promise<{ data: Object[], meta: Meta>} entities
    * @throws {module:interface.standardError}
    */
-  async findAndCountAll (where, currentPage, pageSize, options = {}) {
+  async findAndCountAll (where, currentPage, pageSize, { orderBy = 'createdAt', ...opts } = {}) {
     this._validateFilter(where)
     this._validatePaginateParams(currentPage, pageSize)
 
     const { limit, offset } = this.calculateLimitAndOffset(currentPage, pageSize)
 
     const { rows, count } = await this.model.findAndCountAll({
-      order: [['createdAt', 'DESC']],
-      ...options,
+      order: [[orderBy, 'DESC']],
+      ...opts,
       limit,
       offset,
       distinct: true,
@@ -170,7 +214,10 @@ class BaseRepository {
       transaction: this._getTransaction()
     })
     const meta = this.paginate(currentPage, count, rows, pageSize)
-    return { data: rows.map((row) => row.toJSON()), meta }
+    return {
+      data: rows.map(row => this.mapper.toEntity(row.toJSON())),
+      meta
+    }
   }
 
   /**
@@ -185,10 +232,13 @@ class BaseRepository {
     if (!valid) {
       throw this._getValidationError(errors)
     }
-    const dbEntry = await this.model.create(this.mapper.toDatabase(entity), {
-      transaction: this._getTransaction()
-    })
-    return this.mapper.toEntity(dbEntry.toJSON())
+    const dbEntry = await this.model.create(
+      this.mapper.toDatabase(entity),
+      { transaction: this._getTransaction() }
+    )
+    const json = dbEntry.toJSON()
+    await this.redisRepository.clearReferenced(json)
+    return this.mapper.toEntity(json)
   }
 
   /**
@@ -196,11 +246,12 @@ class BaseRepository {
    *
    * @param {string} id entity uuid
    * @param {Object} updateFields the fields to be updated
+   * @param {boolean} [filterFields=true] should filter updateFields
    * @returns {Promise<module:domain.BaseDomain>} updated domain entity
    * @throws {module:interface.standardError}
    */
-  async patchById (id, updateFields) {
-    return this.patch({ id }, updateFields)
+  async patchById (id, updateFields, filterFields = true) {
+    return this.patch({ id }, updateFields, filterFields)
   }
 
   /**
@@ -208,13 +259,20 @@ class BaseRepository {
    *
    * @param {Object} where filter
    * @param {Object} updateFields the fields to be updated
+   * @param {boolean} [filterFields=true] should filter updateFields
    * @returns {Promise<module:domain.BaseDomain>} updated domain entity
    * @throws {module:interface.standardError}
    */
-  async patch (where, updateFields) {
+  async patch (where, updateFields, filterFields = true) {
     this._validateFilter(where)
 
-    const filteredFields = this._filterPatchFields(updateFields)
+    const filteredFields = filterFields ? this._filterPatchFields(updateFields) : updateFields
+    if (!Object.keys(filteredFields).length) {
+      throw this._getValidationError([{
+        message: EMPTY_UPDATE_FIELDS.message,
+        path: 'updateFields'
+      }])
+    }
     try {
       const filter = await this._getPatchFilter(where)
       const [, result] = await this.model.update(filteredFields, {
@@ -227,7 +285,7 @@ class BaseRepository {
         throw this._getNotFoundError()
       }
       const json = result.toJSON()
-      await this._clearCache(json.id)
+      await this._clearCache(json)
       return this.mapper.toEntity(json)
     } catch (error) {
       switch (error.name) {
@@ -263,16 +321,20 @@ class BaseRepository {
     this._validateFilter(where)
 
     try {
-      const filter = await this._getPatchFilter(where)
-      const [, result] = await this.model.destroy({
-        where: filter,
+      const result = await this.model.findOne({
+        where,
+        distinct: true,
         transaction: this._getTransaction()
       })
       if (!result) {
         throw this._getNotFoundError()
       }
+      await this.model.destroy({
+        where: { id: result.id },
+        transaction: this._getTransaction()
+      })
       const json = result.toJSON()
-      await this._clearCache(json.id)
+      await this._clearCache(json)
       return this.mapper.toEntity(json)
     } catch (error) {
       switch (error.name) {
@@ -287,6 +349,47 @@ class BaseRepository {
   }
 
   // Private
+  _getModelName (model) {
+    const modelName = model.options.name.singular
+    return modelName.charAt(0).toLowerCase() + modelName.slice(1)
+  }
+
+  _getReferences (model) {
+    const models = Object.values(model.sequelize.models)
+    return Object.values(model.rawAttributes)
+      .filter(({ references }) => references && references.key === 'id')
+      .map(attr => {
+        const { model } = attr.references
+        const m = models.find(m => m.tableName === model)
+        return {
+          modelName: this._getModelName(m),
+          fieldName: attr.fieldName
+        }
+      })
+  }
+
+  _normalizeInclude (include) {
+    if (!include) {
+      return []
+    }
+    return include.map(({ model, as, include }) => ({
+      modelName: this._getModelName(model),
+      as,
+      include: include && this._normalizeInclude(include)
+    }))
+  }
+
+  _getIndexes (model) {
+    const models = Object.values(model.sequelize.models)
+    const entries = models.map(model => {
+      const modelName = this._getModelName(model)
+      const indexes = (model.options.indexes || [])
+        .filter(index => index.unique)
+        .map(index => index.fields)
+      return [modelName, indexes]
+    })
+    return Object.fromEntries(entries)
+  }
 
   async _dbFindOne (where) {
     const result = await this.model.findOne({
@@ -300,11 +403,8 @@ class BaseRepository {
     }
   }
 
-  async _clearCache (id) {
-    if (!this.cacheDisabled) {
-      await this.redisRepository.delete(id)
-    }
-    await this.redisRepository.clearRelated(id)
+  _clearCache (entity) {
+    return this.redisRepository.clear(entity, this.cacheDisabled)
   }
 
   async _getPatchFilter (where) {
@@ -342,7 +442,6 @@ class BaseRepository {
       error.type = INVALID_CURRENT_PAGE.code
       throw error
     }
-
     if (Number.isNaN(Number(pageSize))) {
       // Error for developers only, can only occur if the pageSize is invalid
       const error = new Error(INVALID_PAGE_SIZE.message)
@@ -398,7 +497,7 @@ class BaseRepository {
   }
 
   _getCapitalizedModelName () {
-    return this.modelName.charAt(0).toUpperCase() + this.modelName.slice(1)
+    return this.model.options.name.singular
   }
 
   _notFoundErrorMessage () {

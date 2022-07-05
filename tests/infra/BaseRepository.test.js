@@ -50,7 +50,6 @@ describe('BaseRepository', function () {
 
   describe('init', function () {
     const opts = {
-      modelName: 'modelName',
       model: SequelizeModelStub,
       mapper: EntityMapperStub,
       patchAllowedFields: ['field', 'field2'],
@@ -64,10 +63,33 @@ describe('BaseRepository', function () {
       cacheDisabled: false
     }
     it('should init BaseRepository', async function () {
+      sinon.spy(RedisRepositoryStub, 'init')
       baseRepository.init(opts)
       Object.entries(opts).forEach(([key, value]) => {
         expect(baseRepository[key]).to.deep.equal(value)
       })
+      expect(baseRepository.modelName).to.deep.equal('modelName')
+      RedisRepositoryStub.init.should.have.been.calledWith({
+        modelName: 'modelName',
+        indexes: {
+          modelName: [
+            ['a', 'b'],
+            ['c', 'd']
+          ],
+          other: []
+        },
+        references: [
+          { modelName: 'other', fieldName: 'otherId' }
+        ],
+        include: [
+          {
+            modelName: 'modelName',
+            as: 'realted',
+            include: undefined
+          }
+        ]
+      })
+      RedisRepositoryStub.init.restore()
     })
   })
 
@@ -359,6 +381,7 @@ describe('BaseRepository', function () {
       sinon.spy(entity, 'validate')
 
       sinon.spy(baseRepository, '_getValidationError')
+      sinon.spy(RedisRepositoryStub, 'clearReferenced')
       sinon.stub(SequelizeModelStub, 'create').callsFake(() => dbEntry)
       sinon.stub(EntityMapperStub, 'toDatabase').callsFake(() => obj)
       sinon.stub(EntityMapperStub, 'toEntity').callsFake(() => entity)
@@ -376,6 +399,8 @@ describe('BaseRepository', function () {
       EntityMapperStub.toDatabase.should.have.been.calledOnce
       EntityMapperStub.toDatabase.should.have.been.calledWith(entity)
       expect(SequelizeModelStub.create.getCall(0).args[0]).to.deep.equal(obj)
+      RedisRepositoryStub.clearReferenced.should.have.been.calledOnce
+      RedisRepositoryStub.clearReferenced.should.have.been.calledWith(obj)
       EntityMapperStub.toEntity.should.have.been.calledOnce
       EntityMapperStub.toEntity.should.have.been.calledWith(obj)
 
@@ -383,6 +408,7 @@ describe('BaseRepository', function () {
 
       entity.validate.restore()
       baseRepository._getValidationError.restore()
+      RedisRepositoryStub.clearReferenced.restore()
       SequelizeModelStub.create.restore()
       EntityMapperStub.toDatabase.restore()
       EntityMapperStub.toEntity.restore()
@@ -484,7 +510,7 @@ describe('BaseRepository', function () {
       sinon.stub(SequelizeModelStub, 'update').callsFake(() => [1, dbEntry])
       sinon.spy(baseRepository, '_getNotFoundError')
       sinon.stub(EntityMapperStub, 'toEntity').callsFake(() => domainEntity)
-      sinon.spy(RedisRepositoryStub, 'delete')
+      sinon.spy(RedisRepositoryStub, 'clear')
 
       baseRepository.init({
         modelName: 'modelName',
@@ -502,8 +528,8 @@ describe('BaseRepository', function () {
       baseRepository._getNotFoundError.should.have.not.been.called
       EntityMapperStub.toEntity.should.have.been.calledOnce
       EntityMapperStub.toEntity.should.have.been.calledWith(obj)
-      RedisRepositoryStub.delete.should.have.been.calledOnce
-      expect(RedisRepositoryStub.delete.getCall(0).args[0]).to.deep.equal(obj.id)
+      RedisRepositoryStub.clear.should.have.been.calledOnce
+      expect(RedisRepositoryStub.clear.getCall(0).args[0]).to.deep.equal(obj)
       expect(res).to.deep.equal(domainEntity)
 
       baseRepository._filterPatchFields.restore()
@@ -511,7 +537,7 @@ describe('BaseRepository', function () {
       SequelizeModelStub.update.restore()
       baseRepository._getNotFoundError.restore()
       EntityMapperStub.toEntity.restore()
-      RedisRepositoryStub.delete.restore()
+      RedisRepositoryStub.clear.restore()
     })
 
     it('should patch entity (cacheDisabled=true)', async function () {
@@ -520,7 +546,7 @@ describe('BaseRepository', function () {
       sinon.stub(SequelizeModelStub, 'update').callsFake(() => [1, dbEntry])
       sinon.spy(baseRepository, '_getNotFoundError')
       sinon.stub(EntityMapperStub, 'toEntity').callsFake(() => domainEntity)
-      sinon.spy(RedisRepositoryStub, 'delete')
+      sinon.spy(RedisRepositoryStub, 'clear')
 
       baseRepository.init({
         modelName: 'modelName',
@@ -546,7 +572,7 @@ describe('BaseRepository', function () {
       SequelizeModelStub.update.restore()
       baseRepository._getNotFoundError.restore()
       EntityMapperStub.toEntity.restore()
-      RedisRepositoryStub.delete.restore()
+      RedisRepositoryStub.clear.restore()
     })
 
     it('should throw NotFound on patch entity', async function () {
@@ -555,7 +581,7 @@ describe('BaseRepository', function () {
       sinon.stub(SequelizeModelStub, 'update').callsFake(() => [0])
       sinon.spy(baseRepository, '_getNotFoundError')
       sinon.spy(EntityMapperStub, 'toEntity')
-      sinon.spy(RedisRepositoryStub, 'delete')
+      sinon.spy(RedisRepositoryStub, 'clear')
 
       baseRepository.init({
         modelName: 'modelName',
@@ -578,7 +604,7 @@ describe('BaseRepository', function () {
       expect(SequelizeModelStub.update.getCall(0).args[1].where).to.deep.equal(where)
       baseRepository._getNotFoundError.should.have.been.calledOnce
       EntityMapperStub.toEntity.should.have.not.been.called
-      RedisRepositoryStub.delete.should.have.not.been.called
+      RedisRepositoryStub.clear.should.have.not.been.called
       expect(error.message).to.equal('NotFoundError')
 
       baseRepository._filterPatchFields.restore()
@@ -586,7 +612,7 @@ describe('BaseRepository', function () {
       SequelizeModelStub.update.restore()
       baseRepository._getNotFoundError.restore()
       EntityMapperStub.toEntity.restore()
-      RedisRepositoryStub.delete.restore()
+      RedisRepositoryStub.clear.restore()
     })
   })
 
@@ -625,11 +651,11 @@ describe('BaseRepository', function () {
     const domainEntity = EntityStub(obj)
 
     it('should delete entity', async function () {
-      sinon.stub(baseRepository, '_getPatchFilter').callsFake(() => where)
-      sinon.stub(SequelizeModelStub, 'destroy').callsFake(() => [1, dbEntry])
+      sinon.stub(SequelizeModelStub, 'findOne').callsFake(() => dbEntry)
+      sinon.stub(SequelizeModelStub, 'destroy').callsFake(() => true)
       sinon.spy(baseRepository, '_getNotFoundError')
       sinon.stub(EntityMapperStub, 'toEntity').callsFake(() => domainEntity)
-      sinon.spy(RedisRepositoryStub, 'delete')
+      sinon.spy(RedisRepositoryStub, 'clear')
 
       baseRepository.init({
         modelName: 'modelName',
@@ -639,30 +665,28 @@ describe('BaseRepository', function () {
 
       const res = await baseRepository.delete(where)
 
-      baseRepository._getPatchFilter.should.have.been.calledOnce
-      baseRepository._getPatchFilter.should.have.been.calledWith(where)
       SequelizeModelStub.destroy.should.have.been.calledOnce
-      expect(SequelizeModelStub.destroy.getCall(0).args[0].where).to.deep.equal(where)
+      expect(SequelizeModelStub.destroy.getCall(0).args[0].where).to.deep.equal({ id: dbEntry.id })
       baseRepository._getNotFoundError.should.have.not.been.called
       EntityMapperStub.toEntity.should.have.been.calledOnce
       EntityMapperStub.toEntity.should.have.been.calledWith(obj)
-      RedisRepositoryStub.delete.should.have.been.calledOnce
-      RedisRepositoryStub.delete.should.have.been.calledWith(obj.id)
+      RedisRepositoryStub.clear.should.have.been.calledOnce
+      RedisRepositoryStub.clear.should.have.been.calledWith(obj)
       expect(res).to.deep.equal(domainEntity)
 
-      baseRepository._getPatchFilter.restore()
       SequelizeModelStub.destroy.restore()
+      SequelizeModelStub.findOne.restore()
       baseRepository._getNotFoundError.restore()
       EntityMapperStub.toEntity.restore()
-      RedisRepositoryStub.delete.restore()
+      RedisRepositoryStub.clear.restore()
     })
 
     it('should delete entity (cacheDisabled=true)', async function () {
-      sinon.stub(baseRepository, '_getPatchFilter').callsFake(() => where)
+      sinon.stub(SequelizeModelStub, 'findOne').callsFake(() => dbEntry)
       sinon.stub(SequelizeModelStub, 'destroy').callsFake(() => [1, dbEntry])
       sinon.spy(baseRepository, '_getNotFoundError')
       sinon.stub(EntityMapperStub, 'toEntity').callsFake(() => domainEntity)
-      sinon.spy(RedisRepositoryStub, 'delete')
+      sinon.spy(RedisRepositoryStub, 'clear')
 
       baseRepository.init({
         modelName: 'modelName',
@@ -673,28 +697,27 @@ describe('BaseRepository', function () {
 
       const res = await baseRepository.delete(where)
 
-      baseRepository._getPatchFilter.should.have.been.calledOnce
-      baseRepository._getPatchFilter.should.have.been.calledWith(where)
       SequelizeModelStub.destroy.should.have.been.calledOnce
-      expect(SequelizeModelStub.destroy.getCall(0).args[0].where).to.deep.equal(where)
+      expect(SequelizeModelStub.destroy.getCall(0).args[0].where).to.deep.equal({ id: dbEntry.id })
+      RedisRepositoryStub.clear.should.have.been.calledWith(obj, true)
       baseRepository._getNotFoundError.should.have.not.been.called
       EntityMapperStub.toEntity.should.have.been.calledOnce
       EntityMapperStub.toEntity.should.have.been.calledWith(obj)
       expect(res).to.deep.equal(domainEntity)
 
-      baseRepository._getPatchFilter.restore()
+      SequelizeModelStub.findOne.restore()
       SequelizeModelStub.destroy.restore()
       baseRepository._getNotFoundError.restore()
       EntityMapperStub.toEntity.restore()
-      RedisRepositoryStub.delete.restore()
+      RedisRepositoryStub.clear.restore()
     })
 
-    it('should throw NotFound on patch entity', async function () {
-      sinon.stub(baseRepository, '_getPatchFilter').callsFake(() => where)
+    it('should throw NotFound on delete entity', async function () {
+      sinon.stub(SequelizeModelStub, 'findOne').callsFake(() => false)
       sinon.stub(SequelizeModelStub, 'destroy').callsFake(() => [0])
       sinon.spy(baseRepository, '_getNotFoundError')
       sinon.spy(EntityMapperStub, 'toEntity')
-      sinon.spy(RedisRepositoryStub, 'delete')
+      sinon.spy(RedisRepositoryStub, 'clear')
 
       baseRepository.init({
         modelName: 'modelName',
@@ -709,20 +732,19 @@ describe('BaseRepository', function () {
         error = e
       }
 
-      baseRepository._getPatchFilter.should.have.been.calledOnce
-      baseRepository._getPatchFilter.should.have.been.calledWith(where)
-      SequelizeModelStub.destroy.should.have.been.calledOnce
-      expect(SequelizeModelStub.destroy.getCall(0).args[0].where).to.deep.equal(where)
+      SequelizeModelStub.findOne.should.have.been.calledOnce
+      SequelizeModelStub.destroy.should.have.not.been.calledOnce
+      expect(SequelizeModelStub.findOne.getCall(0).args[0].where).to.deep.equal(where)
       baseRepository._getNotFoundError.should.have.been.calledOnce
       EntityMapperStub.toEntity.should.have.not.been.called
-      RedisRepositoryStub.delete.should.have.not.been.called
+      RedisRepositoryStub.clear.should.have.not.been.called
       expect(error.message).to.deep.equal('NotFoundError')
 
-      baseRepository._getPatchFilter.restore()
+      SequelizeModelStub.findOne.restore()
       SequelizeModelStub.destroy.restore()
       baseRepository._getNotFoundError.restore()
       EntityMapperStub.toEntity.restore()
-      RedisRepositoryStub.delete.restore()
+      RedisRepositoryStub.clear.restore()
     })
   })
 
