@@ -326,13 +326,14 @@ export const VALIDATION = {
     name: /^[A-Za-z\- .]+$/,
     specialChar: /\W/,
     printableChars: /^[A-Za-z0-9 <>@!#$%&'*+-/=?^_`(){|}~[\]\\:;,./<>?"]+$/,
-    accountName: /^[A-Za-z0-9 ]+$/,
+    accountName: /^[A-Za-z0-9 .`~!@#$%^&*()_:";'{}[\]+<>?,/]+$/,
     businessName: /^[A-Za-z0-9 .`~!@#$%^&*()_:";'{}[\]+<>?,/]+$/,
-    street: /^[A-Za-z0-9 .]+$/,
+    street: /^[A-Za-z0-9# '.,\-/]+$/,
     city: /[A-Za-z .]+$/,
     stateCode: /^[A-Za-z]+$/,
     countryCode: /^US$/,
-    zip: /(^\d{5}$)|(^\d{5}-\d{4}$)/
+    zip: /(^\d{5}$)|(^\d{5}-\d{4}$)/,
+    phone: /^\d{10}$/
   }
 }
 
